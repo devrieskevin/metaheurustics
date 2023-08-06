@@ -1,4 +1,6 @@
-#[derive(Debug, PartialEq)]
+use std::cmp::Ordering;
+
+#[derive(Debug)]
 /// Individual for numerical values
 pub struct Individual<T> {
     pub min_value: T,
@@ -33,6 +35,24 @@ impl Individual<f64> {
     pub fn set_fitness(&mut self, fitness: f64) -> &mut Self {
         self.fitness = fitness;
         self
+    }
+
+    pub fn compare_fitness(&self, other: &Individual<f64>) -> Ordering {
+        self.fitness.partial_cmp(&other.fitness).unwrap()
+    }
+
+    pub fn compare_wins(&self, other: &Individual<f64>) -> Ordering {
+        self.wins.cmp(&other.wins)
+    }
+
+    pub fn compare_age(&self, other: &Individual<f64>) -> Ordering {
+        self.age.cmp(&other.age)
+    }
+}
+
+impl PartialEq for Individual<f64> {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
     }
 }
 
