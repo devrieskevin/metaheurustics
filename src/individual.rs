@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// Individual for numerical values
 pub struct Individual<T> {
     pub min_value: T,

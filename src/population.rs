@@ -5,6 +5,7 @@ use ndarray_rand::{
 
 use crate::individual::Individual;
 
+#[derive(Clone, Debug)]
 pub struct Population<T> {
     pub individuals: Vec<Individual<T>>,
 }
