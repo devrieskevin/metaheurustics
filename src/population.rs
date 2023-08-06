@@ -40,6 +40,7 @@ mod tests {
         assert_eq!(population.individuals.len(), 10);
         population.individuals.iter().for_each(|individual| {
             assert_eq!(individual.value.len(), 5);
+            assert_eq!(individual.std_dev.len(), 5);
         });
     }
 }
