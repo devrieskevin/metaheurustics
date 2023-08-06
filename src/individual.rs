@@ -14,7 +14,7 @@ pub struct Individual<T> {
 
 /// NumericIndividual implementation for f64
 impl Individual<f64> {
-    /// Create a new Individual
+    /// Creates a new [`Individual<f64>`].
     pub fn new(
         min_value: f64,
         max_value: f64,
@@ -26,25 +26,29 @@ impl Individual<f64> {
             max_value,
             value,
             std_dev,
+            fitness: min_value,
             age: 0,
-            fitness: 0.0,
             wins: 0,
         }
     }
 
+    /// Sets the fitness of this [`Individual<f64>`].
     pub fn set_fitness(&mut self, fitness: f64) -> &mut Self {
         self.fitness = fitness;
         self
     }
 
+    /// Compares the fitness of this [`Individual<f64>`] with another [`Individual<f64>`].
     pub fn compare_fitness(&self, other: &Individual<f64>) -> Ordering {
         self.fitness.partial_cmp(&other.fitness).unwrap()
     }
 
+    /// Compares the wins of this [`Individual<f64>`] with another [`Individual<f64>`].
     pub fn compare_wins(&self, other: &Individual<f64>) -> Ordering {
         self.wins.cmp(&other.wins)
     }
 
+    /// Compares the age of this [`Individual<f64>`] with another [`Individual<f64>`].
     pub fn compare_age(&self, other: &Individual<f64>) -> Ordering {
         self.age.cmp(&other.age)
     }
