@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 #[derive(Debug)]
 /// Individual for numerical values
 pub struct Individual<T> {
-    pub min_value: T,
+pub min_value: T,
     pub max_value: T,
     pub value: Vec<T>,
     pub std_dev: Vec<T>,
