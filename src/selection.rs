@@ -6,6 +6,7 @@ use crate::population::Population;
 mod survivor;
 mod parent;
 
+/// @todo Use stochastic universal sampling instead of roulette wheel selection
 pub fn select_fitness_proportionate(population: &Population<f64>) -> Population<f64> {
     let mut population = population.clone();
     population.individuals.sort_by(|a, b| b.compare_fitness(a));
