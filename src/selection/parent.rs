@@ -1,5 +1,3 @@
-use std::iter::successors;
-
 use ndarray_rand::{
     rand::{thread_rng, Rng},
     rand_distr::{Uniform, WeightedIndex},
