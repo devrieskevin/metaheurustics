@@ -32,6 +32,19 @@ impl Individual<f64> {
         }
     }
 
+    /// Creates a new empty [`Individual<f64>`].
+    pub fn new_empty(min_value: f64, max_value: f64, length: usize) -> Individual<f64> {
+        Individual {
+            min_value,
+            max_value,
+            value: Vec::with_capacity(length),
+            std_dev: Vec::with_capacity(length),
+            fitness: min_value,
+            age: 0,
+            wins: 0,
+        }
+    }
+
     /// Sets the fitness of this [`Individual<f64>`].
     pub fn set_fitness(&mut self, fitness: f64) -> &mut Self {
         self.fitness = fitness;
