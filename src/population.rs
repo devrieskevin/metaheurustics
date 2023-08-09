@@ -28,6 +28,11 @@ impl Population<f64> {
             .collect();
         Self { individuals }
     }
+
+    /// Creates a new [`Population<f64>`] from a vector of [`Individual<f64>`].
+    pub fn new_from_individuals(individuals: Vec<Individual<f64>>) -> Self {
+        Self { individuals }
+    }
 }
 
 #[cfg(test)]
