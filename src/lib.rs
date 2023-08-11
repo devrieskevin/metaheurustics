@@ -1,5 +1,5 @@
-mod individual;
-mod mutation;
-mod population;
-mod recombination;
-mod selection;
+pub mod individual;
+pub mod mutation;
+pub mod population;
+pub mod recombination;
+pub mod selection;

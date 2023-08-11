@@ -1,9 +1,13 @@
-use ndarray_rand::rand::{thread_rng, Rng};
+use ndarray_rand::rand::Rng;
 
 use crate::{individual::Individual, population::Population};
 
 /// Applies single arithmetic recombination on a [`Vec<Individual<f64>>`].
-pub fn single_arithmetic(mating_pool: Vec<Individual<f64>>, alpha: f64) -> Population<f64> {
+pub fn single_arithmetic<R: Rng + ?Sized>(
+    rng: &mut R,
+    mating_pool: Vec<Individual<f64>>,
+    alpha: f64,
+) -> Population<f64> {
     let mut offspring = Vec::with_capacity(mating_pool.len());
 
     let min_val = mating_pool[0].min_value;
@@ -13,7 +17,6 @@ pub fn single_arithmetic(mating_pool: Vec<Individual<f64>>, alpha: f64) -> Popul
     let mut cross_val;
     let mut cross_dev;
     let mut allele;
-    let mut rng = thread_rng();
 
     for i in (0..mating_pool.len()).step_by(2) {
         let mut child_1 = Individual::new_empty(min_val, max_val, length);

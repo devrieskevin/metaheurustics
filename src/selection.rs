@@ -1,2 +1,2 @@
-mod parent;
-mod survivor;
+pub mod parent;
+pub mod survivor;
