@@ -40,11 +40,14 @@ impl Population<f64> {
 #[cfg(test)]
 mod tests {
 
+    use ndarray_rand::rand::thread_rng;
+
     use super::*;
 
     #[test]
     fn test_population() {
-        let population: Population<f64> = Population::new(0.0, 1.0, 5, 10);
+        let mut rng = thread_rng();
+        let population: Population<f64> = Population::new(&mut rng, 0.0, 1.0, 5, 10);
         assert_eq!(population.individuals.len(), 10);
         population.individuals.iter().for_each(|individual| {
             assert_eq!(individual.value.len(), 5);
