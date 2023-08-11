@@ -1,7 +1,4 @@
-use ndarray_rand::{
-    rand::{thread_rng, Rng},
-    rand_distr::Uniform,
-};
+use ndarray_rand::{rand::Rng, rand_distr::Uniform};
 
 use crate::individual::Individual;
 
@@ -12,14 +9,19 @@ pub struct Population<T> {
 
 impl Population<f64> {
     /// Creates a new [`Population<f64>`].
-    pub fn new(min_value: f64, max_value: f64, length: usize, size: usize) -> Self {
+    pub fn new<R: Rng + ?Sized>(
+        rng: &mut R,
+        min_value: f64,
+        max_value: f64,
+        length: usize,
+        size: usize,
+    ) -> Self {
         let individuals = (0..size)
             .map(|_| {
                 Individual::new(
                     min_value,
                     max_value,
-                    thread_rng()
-                        .sample_iter(Uniform::new_inclusive(min_value, max_value))
+                    rng.sample_iter(Uniform::new_inclusive(min_value, max_value))
                         .take(length)
                         .collect(),
                     (0..length).map(|_| 0.0).collect(),

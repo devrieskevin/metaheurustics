@@ -1,7 +1,4 @@
-use crate::{
-    individual::Individual,
-    population::{self, Population},
-};
+use crate::population::Population;
 
 pub fn replace_worst_selection(
     population: &mut Population<f64>,
