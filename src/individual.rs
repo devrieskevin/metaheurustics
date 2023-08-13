@@ -37,8 +37,8 @@ impl Individual<f64> {
         Individual {
             min_value,
             max_value,
-            value: Vec::with_capacity(length),
-            std_dev: Vec::with_capacity(length),
+            value: vec![0.0; length],
+            std_dev: vec![0.0; length],
             fitness: min_value,
             age: 0,
             wins: 0,
