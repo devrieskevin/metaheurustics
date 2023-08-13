@@ -6,7 +6,7 @@ pub fn replace_worst_selection(
     replacement_rate: f64,
 ) {
     population.individuals.sort_by(|a, b| b.compare_fitness(a));
-    offspring.individuals.sort_by(|a, b| b.compare_fitness(a));
+    offspring.individuals.sort_by(|a, b| a.compare_fitness(b));
 
     let replacement_count = (replacement_rate * population.individuals.len() as f64) as usize;
     if replacement_count > population.individuals.len() {
