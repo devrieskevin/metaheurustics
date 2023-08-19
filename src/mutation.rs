@@ -34,3 +34,32 @@ pub fn simple_gaussian<R: Rng + ?Sized>(rng: &mut R, children: &mut [Individual<
         });
     });
 }
+
+/// Mutate the given children using uncorrelated adaptive Gaussian perturbation with changing step sizes.
+pub fn uncorrelated_adaptive_gaussian<R: Rng + ?Sized>(
+    rng: &mut R,
+    children: &mut [Individual<f64>],
+    lr1: f64,
+    lr2: f64,
+    eps: f64,
+) {
+    let mut base_mutation: f64;
+    let mut step_factor: f64;
+    let distribution = Normal::new(0.0, 1.0).unwrap();
+
+    // Apply mutation to std values
+    for child in children.iter_mut() {
+        base_mutation = lr1 * rng.sample(distribution);
+        for j in 0..child.std_dev.len() {
+            step_factor = f64::exp(base_mutation + lr2 * rng.sample(distribution));
+            child.std_dev[j] *= step_factor;
+
+            if child.std_dev[j] < eps {
+                child.std_dev[j] = eps;
+            }
+        }
+    }
+
+    // Apply Gaussian perturbation
+    simple_gaussian(rng, children);
+}
