@@ -62,3 +62,40 @@ pub fn single_arithmetic<R: Rng + ?Sized>(
 
     Population::new_from_individuals(offspring)
 }
+
+/// Applies simple arithmetic recombination on a [`&[Individual<f64>]`].
+pub fn simple_arithmetic(
+    mating_pool: &[Individual<f64>],
+    alpha: f64,
+    cross_point: usize,
+) -> Population<f64> {
+    let min_value = mating_pool[0].min_value;
+    let max_value = mating_pool[0].max_value;
+    let value_length = mating_pool[0].value.len();
+    let pool_size = mating_pool.len();
+
+    let mut offspring = vec![Individual::new_empty(min_value, max_value, value_length); pool_size];
+    for n in (0..pool_size).step_by(2) {
+        offspring[n].value[..cross_point].copy_from_slice(&mating_pool[n].value[..cross_point]);
+        offspring[n + 1].value[..cross_point]
+            .copy_from_slice(&mating_pool[n + 1].value[..cross_point]);
+
+        offspring[n].std_dev[..cross_point].copy_from_slice(&mating_pool[n].std_dev[..cross_point]);
+        offspring[n + 1].std_dev[..cross_point]
+            .copy_from_slice(&mating_pool[n + 1].std_dev[..cross_point]);
+
+        for m in cross_point..pool_size {
+            offspring[n].value[m] =
+                alpha * mating_pool[n + 1].value[m] * (1.0 - alpha) * mating_pool[n].value[m];
+            offspring[n].std_dev[m] =
+                alpha * mating_pool[n + 1].std_dev[m] * (1.0 - alpha) * mating_pool[n].std_dev[m];
+
+            offspring[n + 1].value[m] =
+                alpha * mating_pool[n].value[m] * (1.0 - alpha) * mating_pool[n + 1].value[m];
+            offspring[n + 1].std_dev[m] =
+                alpha * mating_pool[n].std_dev[m] * (1.0 - alpha) * mating_pool[n + 1].std_dev[m];
+        }
+    }
+
+    Population::new_from_individuals(offspring)
+}
