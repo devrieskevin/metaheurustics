@@ -1,4 +1,4 @@
-use ndarray_rand::rand::Rng;
+use ndarray_rand::{rand::Rng, rand_distr::Uniform};
 
 use crate::{individual::Individual, population::Population};
 
@@ -94,6 +94,42 @@ pub fn simple_arithmetic(
                 alpha * mating_pool[n].value[m] * (1.0 - alpha) * mating_pool[n + 1].value[m];
             offspring[n + 1].std_dev[m] =
                 alpha * mating_pool[n].std_dev[m] * (1.0 - alpha) * mating_pool[n + 1].std_dev[m];
+        }
+    }
+
+    Population::new_from_individuals(offspring)
+}
+
+/// Applies blend crossover on a [`&[Individual<f64>]`].
+pub fn blend_crossover<R: Rng + ?Sized>(
+    rng: &mut R,
+    mating_pool: Vec<Individual<f64>>,
+    alpha: f64,
+) -> Population<f64> {
+    let min_value = mating_pool[0].min_value;
+    let max_value = mating_pool[0].max_value;
+    let value_length = mating_pool[0].value.len();
+    let pool_size = mating_pool.len();
+    let distribution = Uniform::new(0.0, 1.0);
+
+    let mut offspring = vec![Individual::new_empty(min_value, max_value, value_length); pool_size];
+    let mut gamma;
+    for n in (0..pool_size).step_by(2) {
+        // Sample blend parameter
+        gamma = (1.0 + 2.0 * alpha) * rng.sample(distribution) - alpha;
+
+        for m in 0..value_length {
+            // Child 1
+            offspring[n].value[m] =
+                gamma * mating_pool[n + 1].value[m] + (1.0 - gamma) * mating_pool[n].value[m];
+            offspring[n].std_dev[m] =
+                gamma * mating_pool[n + 1].std_dev[m] + (1.0 - gamma) * mating_pool[n].std_dev[m];
+
+            // Child 2
+            offspring[n + 1].value[m] =
+                gamma * mating_pool[n].value[m] + (1.0 - gamma) * mating_pool[n + 1].value[m];
+            offspring[n + 1].std_dev[m] =
+                gamma * mating_pool[n].std_dev[m] + (1.0 - gamma) * mating_pool[n + 1].std_dev[m];
         }
     }
 
