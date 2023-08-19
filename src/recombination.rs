@@ -120,12 +120,16 @@ pub fn blend_crossover<R: Rng + ?Sized>(
 
         for m in 0..value_length {
             // Child 1
-            offspring[n].value[m] = gamma * mating_pool[n+1].value[m] + (1.0 - gamma) * mating_pool[n].value[m];
-            offspring[n].std_dev[m] = gamma * mating_pool[n+1].std_dev[m] + (1.0 - gamma) * mating_pool[n].std_dev[m];
+            offspring[n].value[m] =
+                gamma * mating_pool[n + 1].value[m] + (1.0 - gamma) * mating_pool[n].value[m];
+            offspring[n].std_dev[m] =
+                gamma * mating_pool[n + 1].std_dev[m] + (1.0 - gamma) * mating_pool[n].std_dev[m];
 
             // Child 2
-            offspring[n+1].value[m] = gamma * mating_pool[n].value[m] + (1.0 - gamma) * mating_pool[n+1].value[m];
-            offspring[n+1].std_dev[m] = gamma * mating_pool[n].std_dev[m] + (1.0 - gamma) * mating_pool[n+1].std_dev[m];
+            offspring[n + 1].value[m] =
+                gamma * mating_pool[n].value[m] + (1.0 - gamma) * mating_pool[n + 1].value[m];
+            offspring[n + 1].std_dev[m] =
+                gamma * mating_pool[n].std_dev[m] + (1.0 - gamma) * mating_pool[n + 1].std_dev[m];
         }
     }
 
