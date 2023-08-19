@@ -1,5 +1,17 @@
 #!/bin/sh
 
-cargo fmt --all --check
-cargo clippy
+cargo check
+
+cargo fmt --check
+if [ $? -ne 0 ]; then
+    echo "Please run 'cargo fmt' before commiting"
+    exit 1
+fi
+
+cargo clippy -- -D warnings
+if [ $? -ne 0 ]; then
+    echo "Please run 'cargo clippy --fix' before commiting"
+    exit 1
+fi
+
 cargo test
