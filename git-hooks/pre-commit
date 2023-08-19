@@ -1,5 +1,6 @@
 #!/bin/sh
 
-cargo fmt --all --check
+cargo check
+cargo fmt --check
 cargo clippy
 cargo test
