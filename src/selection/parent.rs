@@ -3,7 +3,7 @@ use ndarray_rand::{
     rand_distr::{Uniform, WeightedIndex},
 };
 
-use crate::population::Population;
+use crate::{individual::Individual, population::Population};
 
 /// Selects parents from a population using the fitness proportionate selection method.
 /// Due to stochastic noise, `stochastic_universal_sampling` is recommended over this method.
@@ -75,4 +75,39 @@ pub fn uniform<R: Rng + ?Sized>(rng: &mut R, population: &Population<f64>) -> Po
         .collect();
 
     Population::new_from_individuals(selection)
+}
+
+/// Selects parents from a population using tournament selection.
+pub fn tournament<R: Rng + ?Sized>(
+    rng: &mut R,
+    population: &Population<f64>,
+    tournament_size: usize,
+    number_accepted: usize,
+    number_children: usize,
+) -> Population<f64> {
+    let min_value = population.individuals[0].min_value;
+    let max_value = population.individuals[0].max_value;
+    let length = population.individuals[0].value.len();
+
+    let mut mating_pool =
+        vec![Individual::new_empty(min_value, max_value, length); number_children];
+    let mut candidates = vec![Individual::new_empty(min_value, max_value, length); tournament_size];
+
+    for n in (0..number_children).step_by(number_accepted) {
+        // Sample tournament candidates
+        candidates.iter_mut().for_each(|individual| {
+            *individual =
+                population.individuals[rng.gen_range(0..population.individuals.len())].clone();
+        });
+
+        // Choose fittest candidates
+        candidates.sort_by(|a, b| b.compare_fitness(a));
+        for m in 0..number_accepted {
+            if n + m < mating_pool.len() {
+                mating_pool[n + m] = candidates[tournament_size - 1 - m].clone();
+            }
+        }
+    }
+
+    Population::new_from_individuals(mating_pool)
 }
