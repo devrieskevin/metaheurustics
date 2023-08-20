@@ -1,4 +1,6 @@
-use crate::population::Population;
+use ndarray_rand::rand::{seq::SliceRandom, Rng};
+
+use crate::{individual::Individual, population::Population};
 
 pub fn replace_worst_selection(
     population: &mut Population<f64>,
@@ -15,5 +17,60 @@ pub fn replace_worst_selection(
 
     for n in (population.individuals.len() - replacement_count)..population.individuals.len() {
         population.individuals[n] = offspring.individuals[n].clone();
+    }
+}
+
+/// Selects survivors from a population using round robin tournament selection.
+pub fn round_robin_tournament<R: Rng + ?Sized>(
+    rng: &mut R,
+    population: &mut Population<f64>,
+    offspring: &mut Population<f64>,
+    number_rivals: usize,
+) {
+    let mut count: usize;
+    let mut candidate: &mut Individual<f64>;
+
+    let merged = population
+        .individuals
+        .iter()
+        .chain(offspring.individuals.iter())
+        .cloned()
+        .collect();
+    let mut merged = Population::new_from_individuals(merged);
+
+    let merged_size = merged.individuals.len();
+    // Determine wins in tournament
+    for n in 0..merged_size {
+        let rivals = merged.individuals.clone();
+        let rivals = rivals.choose_multiple(rng, merged_size);
+
+        // Initialize candidate for tournament
+        candidate = &mut merged.individuals[n];
+        candidate.wins = 0;
+
+        count = 0;
+        for rival in rivals {
+            // Candidate does not battle itself
+            if rival != candidate {
+                candidate.wins += if candidate.fitness > rival.fitness {
+                    1
+                } else {
+                    0
+                };
+                count += 1;
+            }
+
+            if count >= number_rivals {
+                break;
+            };
+        }
+    }
+
+    // Sort based on wins
+    merged.individuals.sort_by(|a, b| b.compare_wins(a));
+
+    // Insert survivors into population
+    for n in 0..population.individuals.len() {
+        population.individuals[n] = merged.individuals[n].clone();
     }
 }
