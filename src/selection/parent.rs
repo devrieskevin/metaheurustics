@@ -64,3 +64,15 @@ pub fn stochastic_universal_sampling<R: Rng + ?Sized>(
     population.individuals = selection;
     population
 }
+
+/// Selects parents from a population using uniform selection.
+pub fn uniform<R: Rng + ?Sized>(rng: &mut R, population: &Population<f64>) -> Population<f64> {
+    let population_size = population.individuals.len();
+
+    let selection = (0..population_size)
+        .map(|_| rng.gen_range(0..population_size))
+        .map(|i| population.individuals[i].clone())
+        .collect();
+
+    Population::new_from_individuals(selection)
+}
