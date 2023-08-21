@@ -137,3 +137,23 @@ pub fn linear_ranking<R: Rng + ?Sized>(
 
     stochastic_universal_sampling(rng, population, number_children, Some(&probabilities))
 }
+
+pub fn exponential_ranking<R: Rng + ?Sized>(
+    rng: &mut R,
+    population: &mut Population<f64>,
+    number_children: usize,
+) -> Population<f64> {
+    let length = population.individuals.first().unwrap().value.len();
+
+    // Sort group based on fitness for ranking
+    population.individuals.sort_by(|a, b| a.compare_fitness(b));
+
+    let mut probabilities: Vec<f64> = (0..length).map(|i| 1.0 - f64::exp(-(i as f64))).collect();
+    let sum_probabilities: f64 = probabilities.iter().sum();
+
+    probabilities.iter_mut().for_each(|probability| {
+        *probability /= sum_probabilities;
+    });
+
+    stochastic_universal_sampling(rng, population, number_children, Some(&probabilities))
+}
