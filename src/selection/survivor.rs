@@ -86,3 +86,9 @@ pub fn merge_ranked(population: &mut Population<f64>, offspring: &mut Population
     merged.sort_by(|a, b| b.compare_fitness(a));
     population.individuals = merged[0..population.individuals.len()].to_vec();
 }
+
+/// Selects survivors from a population using (mu, lambda) selection.
+pub fn generational_ranked(population: &mut Population<f64>, offspring: &mut Population<f64>) {
+    offspring.individuals.sort_by(|a, b| b.compare_fitness(a));
+    population.individuals = offspring.individuals[0..population.individuals.len()].to_vec();
+}
