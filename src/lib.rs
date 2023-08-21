@@ -37,8 +37,12 @@ mod tests {
             .unwrap();
         for _ in 0..100 {
             // Parent selection
-            let mating_pool =
-                selection::parent::stochastic_universal_sampling(&mut rng, &population);
+            let mating_pool = selection::parent::stochastic_universal_sampling(
+                &mut rng,
+                &population,
+                population.individuals.len(),
+                None,
+            );
 
             // Generate offspring
             let mut offspring =
