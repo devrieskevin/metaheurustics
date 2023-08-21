@@ -74,3 +74,15 @@ pub fn round_robin_tournament<R: Rng + ?Sized>(
         population.individuals[n] = merged.individuals[n].clone();
     }
 }
+
+/// Selects survivors from a population using mu + lambda selection.
+pub fn merge_ranked(population: &mut Population<f64>, offspring: &mut Population<f64>) {
+    let mut merged: Vec<Individual<f64>> = population
+        .individuals
+        .iter()
+        .chain(offspring.individuals.iter())
+        .cloned()
+        .collect();
+    merged.sort_by(|a, b| b.compare_fitness(a));
+    population.individuals = merged[0..population.individuals.len()].to_vec();
+}
