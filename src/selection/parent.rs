@@ -34,35 +34,40 @@ pub fn fitness_proportionate_selection<R: Rng + ?Sized>(
 pub fn stochastic_universal_sampling<R: Rng + ?Sized>(
     rng: &mut R,
     population: &Population<f64>,
+    number_children: usize,
+    probabilities: Option<&[f64]>,
 ) -> Population<f64> {
-    let mut population = population.clone();
-    population.individuals.sort_by(|a, b| b.compare_fitness(a));
+    let fitnesses = population
+        .individuals
+        .iter()
+        .map(|individual| individual.fitness);
+    let sum_fitnesses = fitnesses.clone().sum::<f64>();
+    let fitness_probabilities = fitnesses
+        .map(|fitness| fitness / sum_fitnesses)
+        .collect::<Vec<f64>>();
+    let probabilities = match probabilities {
+        Some(p) => p,
+        None => &fitness_probabilities,
+    };
 
-    let sum_fitnesses = population
-        .individuals
+    let cumulative_probabilities = probabilities
         .iter()
-        .map(|individual| individual.fitness)
-        .sum::<f64>();
-    let cumulative_probabilities = population
-        .individuals
-        .iter()
-        .map(|individual| individual.fitness / sum_fitnesses)
         .scan(0.0, |state, x| {
             *state += x;
             Some(*state)
         })
         .enumerate();
 
-    let mut selection = Vec::with_capacity(population.individuals.len());
-    let mut r = rng.sample(Uniform::new(0.0, 1.0 / population.individuals.len() as f64));
+    let mut selection = Vec::with_capacity(number_children);
+    let mut r = rng.sample(Uniform::new(0.0, 1.0 / number_children as f64));
     for (i, cumulative_probability) in cumulative_probabilities {
         while r <= cumulative_probability {
             selection.push(population.individuals[i].clone());
             r += 1.0 / population.individuals.len() as f64;
         }
     }
-    population.individuals = selection;
-    population
+
+    Population::new_from_individuals(selection)
 }
 
 /// Selects parents from a population using uniform selection.
@@ -110,4 +115,25 @@ pub fn tournament<R: Rng + ?Sized>(
     }
 
     Population::new_from_individuals(mating_pool)
+}
+
+/// Selects parents from a population using linear ranking selection.
+pub fn linear_ranking<R: Rng + ?Sized>(
+    rng: &mut R,
+    population: &mut Population<f64>,
+    s: f64,
+    number_children: usize,
+) -> Population<f64> {
+    let length = population.individuals.first().unwrap().value.len();
+    let mu: f64 = length as f64;
+
+    // Sort group based on fitness for ranking
+    population.individuals.sort_by(|a, b| a.compare_fitness(b));
+
+    // Compute probabilities from ranking
+    let probabilities = (0..length)
+        .map(|i| (2.0 - s) / mu + 2.0 * (i as f64) * (s - 1.0) / (mu * (mu - 1.0)))
+        .collect::<Vec<f64>>();
+
+    stochastic_universal_sampling(rng, population, number_children, Some(&probabilities))
 }
