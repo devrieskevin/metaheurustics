@@ -35,6 +35,13 @@ impl Population<f64> {
     pub fn new_from_individuals(individuals: Vec<Individual<f64>>) -> Self {
         Self { individuals }
     }
+
+    /// Increments the age of all individuals in the population.
+    pub fn increment_ages(&mut self) {
+        self.individuals.iter_mut().for_each(|individual| {
+            individual.age += 1;
+        });
+    }
 }
 
 #[cfg(test)]
