@@ -35,6 +35,18 @@ impl Population<f64> {
     pub fn new_from_individuals(individuals: Vec<Individual<f64>>) -> Self {
         Self { individuals }
     }
+
+    /// Sets the fitnesses of the population.
+    pub fn set_fitnesses(&mut self, fitnesses: &[f64]) {
+        if fitnesses.len() != self.individuals.len() {
+            panic!("Length of fitnesses must be equal to the size of the population.");
+        }
+
+        self.individuals
+            .iter_mut()
+            .zip(fitnesses)
+            .for_each(|(individual, fitness)| individual.fitness = *fitness);
+    }
 }
 
 #[cfg(test)]
