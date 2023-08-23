@@ -36,6 +36,18 @@ impl Population<f64> {
         Self { individuals }
     }
 
+    /// Sets the fitnesses of the population.
+    pub fn set_fitnesses(&mut self, fitnesses: &[f64]) {
+        if fitnesses.len() != self.individuals.len() {
+            panic!("Length of fitnesses must be equal to the size of the population.");
+        }
+
+        self.individuals
+            .iter_mut()
+            .zip(fitnesses)
+            .for_each(|(individual, fitness)| individual.fitness = *fitness);
+    }
+
     /// Increments the age of all individuals in the population.
     pub fn increment_ages(&mut self) {
         self.individuals.iter_mut().for_each(|individual| {
