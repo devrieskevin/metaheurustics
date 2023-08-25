@@ -1,4 +1,4 @@
-use ndarray_rand::rand::{seq::SliceRandom, Rng};
+use rand::{seq::SliceRandom, Rng};
 
 use crate::{individual::Individual, population::Population};
 

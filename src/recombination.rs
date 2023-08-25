@@ -1,4 +1,5 @@
-use ndarray_rand::{rand::Rng, rand_distr::Uniform};
+use rand::Rng;
+use rand_distr::Uniform;
 
 use crate::{individual::Individual, population::Population};
 

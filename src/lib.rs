@@ -7,7 +7,7 @@ pub mod selection;
 
 #[cfg(test)]
 mod tests {
-    use ndarray_rand::rand::{rngs::StdRng, SeedableRng};
+    use rand::{rngs::StdRng, SeedableRng};
 
     use crate::{
         benchmark::bent_cigar, mutation, population::Population, recombination, selection,
