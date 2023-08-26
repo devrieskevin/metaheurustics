@@ -35,12 +35,26 @@ pub fn sample_multivariate_gaussian<R: Rng + ?Sized, B: FromIterator<C>, C: From
 
 #[cfg(test)]
 mod tests {
+    use nalgebra::{DMatrix, Dyn, Matrix, VecStorage};
     use rand::thread_rng;
 
     use super::sample_multivariate_gaussian;
 
+    fn calculate_sample_covariance(
+        sample_matrix: Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>,
+    ) -> Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>> {
+        let sample_mean_vector = sample_matrix.row_mean().transpose();
+        let sample_covariance_matrix: Matrix<_, _, _, _> = sample_matrix
+            .row_iter()
+            .map(|row| &row.transpose() - &sample_mean_vector)
+            .map(|x| &x * &x.transpose())
+            .sum();
+
+        sample_covariance_matrix / (sample_matrix.nrows() as f64 - 1.0)
+    }
+
     #[test]
-    fn test_mean() {
+    fn test_standard_gaussian_statistics() {
         const SIZE: usize = 10;
         const N_SAMPLES: usize = 10000;
         const TOLERANCE: f64 = 1e-1;
@@ -61,25 +75,34 @@ mod tests {
 
         let samples: Vec<Vec<f64>> =
             sample_multivariate_gaussian(&mut rng, &mean, &covariance, N_SAMPLES);
-        let sample_mean: Vec<f64> = (0..SIZE)
-            .map(|i| {
-                let sum: f64 = samples.iter().flatten().skip(i).step_by(SIZE).sum();
-                let count = samples.iter().flatten().skip(i).step_by(SIZE).count() as f64;
-                sum / count
-            })
-            .collect();
+        let sample_matrix =
+            DMatrix::from_row_iterator(N_SAMPLES, SIZE, samples.into_iter().flatten());
 
-        let error: f64 = mean
+        let sample_mean = sample_matrix.row_mean();
+        let mean_error: f64 = mean
             .iter()
-            .zip(sample_mean)
+            .zip(&sample_mean)
             .map(|(a, b)| f64::abs(a - b))
             .sum();
-        let error = error / mean.len() as f64;
+        let mean_error = mean_error / mean.len() as f64;
 
         assert!(
-            error < TOLERANCE,
-            "Resulting mean: {} < {}",
-            error,
+            mean_error < TOLERANCE,
+            "Resulting mean error: {} < {}",
+            mean_error,
+            TOLERANCE
+        );
+
+        let sample_covariance_matrix = calculate_sample_covariance(sample_matrix);
+
+        let covariance_matrix = DMatrix::from_row_slice(SIZE, SIZE, &covariance);
+        let covariance_error = (&sample_covariance_matrix - &covariance_matrix)
+            .abs()
+            .mean();
+        assert!(
+            covariance_error < TOLERANCE,
+            "Resulting covariance error: {} < {}",
+            covariance_error,
             TOLERANCE
         );
     }
