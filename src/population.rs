@@ -1,7 +1,5 @@
-use ndarray_rand::{
-    rand::{seq::SliceRandom, Rng},
-    rand_distr::Uniform,
-};
+use rand::{seq::SliceRandom, Rng};
+use rand_distr::Uniform;
 
 use crate::individual::Individual;
 
@@ -117,7 +115,7 @@ impl Population<f64> {
 #[cfg(test)]
 mod tests {
 
-    use ndarray_rand::rand::thread_rng;
+    use rand::thread_rng;
 
     use super::*;
 

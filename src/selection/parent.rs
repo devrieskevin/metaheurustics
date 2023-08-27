@@ -1,7 +1,5 @@
-use ndarray_rand::{
-    rand::Rng,
-    rand_distr::{Uniform, WeightedIndex},
-};
+use rand::Rng;
+use rand_distr::{Uniform, WeightedIndex};
 
 use crate::{individual::Individual, population::Population};
 
