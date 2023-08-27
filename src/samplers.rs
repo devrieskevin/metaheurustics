@@ -36,7 +36,7 @@ pub fn sample_multivariate_gaussian<R: Rng + ?Sized, B: FromIterator<C>, C: From
 #[cfg(test)]
 mod tests {
     use nalgebra::{DMatrix, Dyn, Matrix, VecStorage};
-    use rand::{rngs::StdRng, thread_rng, Rng, SeedableRng};
+    use rand::{rngs::StdRng, Rng, SeedableRng};
 
     use super::sample_multivariate_gaussian;
 
