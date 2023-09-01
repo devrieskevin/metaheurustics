@@ -45,6 +45,15 @@ impl Individual<f64> {
         }
     }
 
+    pub fn compete(&mut self, other: &Self) -> &mut Self {
+        self.wins += match self.fitness > other.fitness {
+            true => 1,
+            false => 0,
+        };
+
+        self
+    }
+
     /// Sets the fitness of this [`Individual<f64>`].
     pub fn set_fitness(&mut self, fitness: f64) -> &mut Self {
         self.fitness = fitness;

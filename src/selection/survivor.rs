@@ -30,12 +30,7 @@ pub fn round_robin_tournament<R: Rng + ?Sized>(
     let mut count: usize;
     let mut candidate: &mut Individual<f64>;
 
-    let merged = population
-        .individuals
-        .iter()
-        .chain(offspring.individuals.iter())
-        .cloned()
-        .collect();
+    let merged = merge_populations(population, offspring);
     let mut merged = Population::new_from_individuals(merged);
 
     let merged_size = merged.individuals.len();
@@ -52,11 +47,7 @@ pub fn round_robin_tournament<R: Rng + ?Sized>(
         for rival in rivals {
             // Candidate does not battle itself
             if rival != candidate {
-                candidate.wins += if candidate.fitness > rival.fitness {
-                    1
-                } else {
-                    0
-                };
+                candidate.compete(rival);
                 count += 1;
             }
 
@@ -77,12 +68,7 @@ pub fn round_robin_tournament<R: Rng + ?Sized>(
 
 /// Selects survivors from a population using mu + lambda selection.
 pub fn merge_ranked(population: &mut Population<f64>, offspring: &mut Population<f64>) {
-    let mut merged: Vec<Individual<f64>> = population
-        .individuals
-        .iter()
-        .chain(offspring.individuals.iter())
-        .cloned()
-        .collect();
+    let mut merged: Vec<Individual<f64>> = merge_populations(population, offspring);
     merged.sort_by(|a, b| b.compare_fitness(a));
     population.individuals = merged[0..population.individuals.len()].to_vec();
 }
@@ -91,4 +77,16 @@ pub fn merge_ranked(population: &mut Population<f64>, offspring: &mut Population
 pub fn generational_ranked(population: &mut Population<f64>, offspring: &mut Population<f64>) {
     offspring.individuals.sort_by(|a, b| b.compare_fitness(a));
     population.individuals = offspring.individuals[0..population.individuals.len()].to_vec();
+}
+
+fn merge_populations<B: FromIterator<Individual<f64>>>(
+    population: &mut Population<f64>,
+    offspring: &mut Population<f64>,
+) -> B {
+    population
+        .individuals
+        .iter()
+        .chain(offspring.individuals.iter())
+        .cloned()
+        .collect()
 }
