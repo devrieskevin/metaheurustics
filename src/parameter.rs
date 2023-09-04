@@ -10,7 +10,7 @@ pub trait Parameter<const N: usize> {
 
 pub struct BoundedVector<T>
 where
-    T: PartialOrd
+    T: PartialOrd,
 {
     pub min_value: T,
     pub max_value: T,

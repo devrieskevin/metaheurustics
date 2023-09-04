@@ -9,18 +9,22 @@ pub trait Mutator<T> {
 
 pub struct UniformMutator {
     probability: f64,
-};
+}
 
 impl UniformMutator {
     pub fn new(probability: f64) -> Self {
         UniformMutator {
-            probability: probability.clamp(0.0, 1.0)
+            probability: probability.clamp(0.0, 1.0),
         }
     }
 }
 
 impl Mutator<BoundedVector<f64>> for UniformMutator {
-    fn mutate<'a, R: Rng + ?Sized>(&self, rng: &mut R, parameter: &'a mut BoundedVector<f64>) -> &'a mut BoundedVector<f64> {
+    fn mutate<'a, R: Rng + ?Sized>(
+        &self,
+        rng: &mut R,
+        parameter: &'a mut BoundedVector<f64>,
+    ) -> &'a mut BoundedVector<f64> {
         let distribution = Uniform::new_inclusive(parameter.min_value, parameter.max_value);
         parameter.value.iter_mut().for_each(|value| {
             let random_value = rng.sample(Uniform::new(0.0, 1.0));
