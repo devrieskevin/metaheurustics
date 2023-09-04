@@ -1,7 +1,7 @@
 use rand::{seq::SliceRandom, Rng};
 use rand_distr::Uniform;
 
-use crate::individual::Individual;
+use crate::individual::{BasicIndividual, Individual};
 
 pub enum MigrationType {
     Random,
@@ -11,7 +11,7 @@ pub enum MigrationType {
 
 #[derive(Clone, Debug)]
 pub struct Population<T> {
-    pub individuals: Vec<Individual<T>>,
+    pub individuals: Vec<BasicIndividual<T>>,
 }
 
 impl Population<f64> {
@@ -25,7 +25,7 @@ impl Population<f64> {
     ) -> Self {
         let individuals = (0..size)
             .map(|_| {
-                Individual::new(
+                BasicIndividual::new(
                     min_value,
                     max_value,
                     rng.sample_iter(Uniform::new_inclusive(min_value, max_value))
@@ -39,7 +39,7 @@ impl Population<f64> {
     }
 
     /// Creates a new [`Population<f64>`] from a vector of [`Individual<f64>`].
-    pub fn new_from_individuals(individuals: Vec<Individual<f64>>) -> Self {
+    pub fn new_from_individuals(individuals: Vec<BasicIndividual<f64>>) -> Self {
         Self { individuals }
     }
 
@@ -76,8 +76,8 @@ impl Population<f64> {
         let length = archipelago[0].individuals[0].value.len();
 
         // Cache array to store individuals for migration to next island
-        let mut cache: Vec<Individual<f64>> =
-            vec![Individual::new_empty(min_value, max_value, length); number_swap];
+        let mut cache: Vec<BasicIndividual<f64>> =
+            vec![BasicIndividual::new_empty(min_value, max_value, length); number_swap];
 
         // Choose if ring topology or random pairwise topology
         if shuffle {

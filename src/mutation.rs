@@ -1,10 +1,18 @@
 use rand::Rng;
 use rand_distr::{Normal, Uniform};
 
-use crate::individual::Individual;
+use crate::individual::BasicIndividual;
+
+pub trait Mutator<T> {
+    fn mutate<'a, R: Rng + ?Sized>(rng: &mut R, parameter: &'a mut T) -> &'a mut T;
+}
 
 /// Mutate the given children using the uniform mutation method.
-pub fn uniform<R: Rng + ?Sized>(rng: &mut R, probability: f64, children: &mut [Individual<f64>]) {
+pub fn uniform<R: Rng + ?Sized>(
+    rng: &mut R,
+    probability: f64,
+    children: &mut [BasicIndividual<f64>],
+) {
     children.iter_mut().for_each(|child| {
         child.value.iter_mut().for_each(|value| {
             let random_value = rng.sample(Uniform::new(0.0, 1.0));
@@ -17,7 +25,7 @@ pub fn uniform<R: Rng + ?Sized>(rng: &mut R, probability: f64, children: &mut [I
 }
 
 /// Mutate the given children using simple Gaussian perturbation mutation method using individual variance(s).
-pub fn simple_gaussian<R: Rng + ?Sized>(rng: &mut R, children: &mut [Individual<f64>]) {
+pub fn simple_gaussian<R: Rng + ?Sized>(rng: &mut R, children: &mut [BasicIndividual<f64>]) {
     children.iter_mut().for_each(|child| {
         child.value.iter_mut().enumerate().for_each(|(n, value)| {
             let distribution = Normal::new(0.0, child.std_dev[n]).unwrap();
@@ -36,7 +44,7 @@ pub fn simple_gaussian<R: Rng + ?Sized>(rng: &mut R, children: &mut [Individual<
 /// Mutate the given children using uncorrelated adaptive Gaussian perturbation with changing step sizes.
 pub fn uncorrelated_adaptive_gaussian<R: Rng + ?Sized>(
     rng: &mut R,
-    children: &mut [Individual<f64>],
+    children: &mut [BasicIndividual<f64>],
     lr1: f64,
     lr2: f64,
     eps: f64,

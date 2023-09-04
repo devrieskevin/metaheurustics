@@ -1,8 +1,25 @@
 use std::cmp::Ordering;
 
+pub trait Individual<F>
+where
+    F: PartialOrd,
+{
+    fn fitness(&self) -> F;
+
+    fn compare_fitness(&self, other: &Self) -> Ordering {
+        F::partial_cmp(&self.fitness(), &other.fitness()).unwrap()
+    }
+
+    fn age(&self) -> u32;
+
+    fn compare_age(&self, other: &Self) -> Ordering {
+        u32::cmp(&self.age(), &other.age())
+    }
+}
+
 #[derive(Debug, Clone)]
 /// Individual for numerical values
-pub struct Individual<T> {
+pub struct BasicIndividual<T> {
     pub min_value: T,
     pub max_value: T,
     pub value: Vec<T>,
@@ -13,15 +30,15 @@ pub struct Individual<T> {
 }
 
 /// NumericIndividual implementation for f64
-impl Individual<f64> {
+impl BasicIndividual<f64> {
     /// Creates a new [`Individual<f64>`].
     pub fn new(
         min_value: f64,
         max_value: f64,
         value: Vec<f64>,
         std_dev: Vec<f64>,
-    ) -> Individual<f64> {
-        Individual {
+    ) -> BasicIndividual<f64> {
+        BasicIndividual {
             min_value,
             max_value,
             value,
@@ -33,8 +50,8 @@ impl Individual<f64> {
     }
 
     /// Creates a new empty [`Individual<f64>`].
-    pub fn new_empty(min_value: f64, max_value: f64, length: usize) -> Individual<f64> {
-        Individual {
+    pub fn new_empty(min_value: f64, max_value: f64, length: usize) -> BasicIndividual<f64> {
+        BasicIndividual {
             min_value,
             max_value,
             value: vec![0.0; length],
@@ -60,25 +77,25 @@ impl Individual<f64> {
         self
     }
 
-    /// Compares the fitness of this [`Individual<f64>`] with another [`Individual<f64>`].
-    pub fn compare_fitness(&self, other: &Individual<f64>) -> Ordering {
-        self.fitness.partial_cmp(&other.fitness).unwrap()
-    }
-
     /// Compares the wins of this [`Individual<f64>`] with another [`Individual<f64>`].
-    pub fn compare_wins(&self, other: &Individual<f64>) -> Ordering {
+    pub fn compare_wins(&self, other: &BasicIndividual<f64>) -> Ordering {
         self.wins.cmp(&other.wins)
-    }
-
-    /// Compares the age of this [`Individual<f64>`] with another [`Individual<f64>`].
-    pub fn compare_age(&self, other: &Individual<f64>) -> Ordering {
-        self.age.cmp(&other.age)
     }
 }
 
-impl PartialEq for Individual<f64> {
+impl PartialEq for BasicIndividual<f64> {
     fn eq(&self, other: &Self) -> bool {
         self.value == other.value
+    }
+}
+
+impl Individual<f64> for BasicIndividual<f64> {
+    fn fitness(&self) -> f64 {
+        self.fitness
+    }
+
+    fn age(&self) -> u32 {
+        self.age
     }
 }
 
@@ -88,8 +105,8 @@ mod tests {
 
     #[test]
     fn test_individual_creation() {
-        let individual = Individual::new(0.0, 1.0, vec![0.5], vec![0.1]);
-        let test_individual = Individual {
+        let individual = BasicIndividual::new(0.0, 1.0, vec![0.5], vec![0.1]);
+        let test_individual = BasicIndividual {
             min_value: 0.0,
             max_value: 1.0,
             value: vec![0.5],
@@ -103,7 +120,7 @@ mod tests {
 
     #[test]
     fn test_individual_set_fitness() {
-        let mut individual = Individual::new(0.0, 1.0, vec![0.5], vec![0.1]);
+        let mut individual = BasicIndividual::new(0.0, 1.0, vec![0.5], vec![0.1]);
         individual.set_fitness(0.5).set_fitness(1.0);
         assert_eq!(individual.fitness, 1.0);
     }

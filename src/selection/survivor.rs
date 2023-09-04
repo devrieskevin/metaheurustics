@@ -1,6 +1,9 @@
 use rand::{seq::SliceRandom, Rng};
 
-use crate::{individual::Individual, population::Population};
+use crate::{
+    individual::{BasicIndividual, Individual},
+    population::Population,
+};
 
 pub fn replace_worst_selection(
     population: &mut Population<f64>,
@@ -28,7 +31,7 @@ pub fn round_robin_tournament<R: Rng + ?Sized>(
     number_rivals: usize,
 ) {
     let mut count: usize;
-    let mut candidate: &mut Individual<f64>;
+    let mut candidate: &mut BasicIndividual<f64>;
 
     let merged = merge_populations(population, offspring);
     let mut merged = Population::new_from_individuals(merged);
@@ -68,7 +71,7 @@ pub fn round_robin_tournament<R: Rng + ?Sized>(
 
 /// Selects survivors from a population using mu + lambda selection.
 pub fn merge_ranked(population: &mut Population<f64>, offspring: &mut Population<f64>) {
-    let mut merged: Vec<Individual<f64>> = merge_populations(population, offspring);
+    let mut merged: Vec<BasicIndividual<f64>> = merge_populations(population, offspring);
     merged.sort_by(|a, b| b.compare_fitness(a));
     population.individuals = merged[0..population.individuals.len()].to_vec();
 }
@@ -79,7 +82,7 @@ pub fn generational_ranked(population: &mut Population<f64>, offspring: &mut Pop
     population.individuals = offspring.individuals[0..population.individuals.len()].to_vec();
 }
 
-fn merge_populations<B: FromIterator<Individual<f64>>>(
+fn merge_populations<B: FromIterator<BasicIndividual<f64>>>(
     population: &mut Population<f64>,
     offspring: &mut Population<f64>,
 ) -> B {

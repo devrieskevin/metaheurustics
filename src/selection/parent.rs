@@ -1,7 +1,10 @@
 use rand::Rng;
 use rand_distr::{Uniform, WeightedIndex};
 
-use crate::{individual::Individual, population::Population};
+use crate::{
+    individual::{BasicIndividual, Individual},
+    population::Population,
+};
 
 pub fn roulette_wheel<R: Rng + ?Sized>(
     rng: &mut R,
@@ -71,8 +74,9 @@ pub fn tournament<R: Rng + ?Sized>(
     let length = population.individuals[0].value.len();
 
     let mut mating_pool =
-        vec![Individual::new_empty(min_value, max_value, length); number_children];
-    let mut candidates = vec![Individual::new_empty(min_value, max_value, length); tournament_size];
+        vec![BasicIndividual::new_empty(min_value, max_value, length); number_children];
+    let mut candidates =
+        vec![BasicIndividual::new_empty(min_value, max_value, length); tournament_size];
 
     for n in (0..number_children).step_by(number_accepted) {
         // Sample tournament candidates
