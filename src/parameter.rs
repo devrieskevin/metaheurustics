@@ -8,8 +8,11 @@ pub trait Parameter<const N: usize> {
         Self: Sized;
 }
 
-pub struct BoundedVector<T> {
-    min_value: T,
-    max_value: T,
-    value: T,
+pub struct BoundedVector<T>
+where
+    T: PartialOrd
+{
+    pub min_value: T,
+    pub max_value: T,
+    pub value: Vec<T>,
 }

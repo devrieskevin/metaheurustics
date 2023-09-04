@@ -1,10 +1,35 @@
 use rand::Rng;
 use rand_distr::{Normal, Uniform};
 
-use crate::individual::BasicIndividual;
+use crate::{individual::BasicIndividual, parameter::BoundedVector};
 
 pub trait Mutator<T> {
-    fn mutate<'a, R: Rng + ?Sized>(rng: &mut R, parameter: &'a mut T) -> &'a mut T;
+    fn mutate<'a, R: Rng + ?Sized>(&self, rng: &mut R, parameter: &'a mut T) -> &'a mut T;
+}
+
+pub struct UniformMutator {
+    probability: f64,
+};
+
+impl UniformMutator {
+    pub fn new(probability: f64) -> Self {
+        UniformMutator {
+            probability: probability.clamp(0.0, 1.0)
+        }
+    }
+}
+
+impl Mutator<BoundedVector<f64>> for UniformMutator {
+    fn mutate<'a, R: Rng + ?Sized>(&self, rng: &mut R, parameter: &'a mut BoundedVector<f64>) -> &'a mut BoundedVector<f64> {
+        let distribution = Uniform::new_inclusive(parameter.min_value, parameter.max_value);
+        parameter.value.iter_mut().for_each(|value| {
+            let random_value = rng.sample(Uniform::new(0.0, 1.0));
+            if random_value <= self.probability {
+                *value = rng.sample(distribution);
+            }
+        });
+        parameter
+    }
 }
 
 /// Mutate the given children using the uniform mutation method.
