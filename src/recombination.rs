@@ -1,10 +1,55 @@
 use rand::Rng;
 use rand_distr::Uniform;
 
-use crate::{individual::BasicIndividual, population::Population};
+use crate::{individual::BasicIndividual, parameter::BoundedVector, population::Population};
 
 pub trait Recombinator<T, const N: usize> {
-    fn recombine<R: Rng + ?Sized>(rng: &mut R, parents: &[&T; N]) -> [T; N];
+    fn recombine<R: Rng + ?Sized>(&self, rng: &mut R, parents: &[T; N]) -> [T; N];
+}
+
+pub struct SingleArithmetic {
+    alpha: f64,
+}
+
+impl SingleArithmetic {
+    pub fn new(alpha: f64) -> Self {
+        SingleArithmetic {
+            alpha: alpha.clamp(0.0, 1.0),
+        }
+    }
+}
+
+impl Recombinator<BoundedVector<f64>, 2> for SingleArithmetic {
+    fn recombine<R: Rng + ?Sized>(
+        &self,
+        rng: &mut R,
+        parents: &[BoundedVector<f64>; 2],
+    ) -> [BoundedVector<f64>; 2] {
+        let [parent_1, parent_2] = parents;
+        let length = usize::min(parent_1.value.len(), parent_2.value.len());
+
+        let mut cross_val;
+
+        let mut child_1 = BoundedVector::clone(parent_1);
+        let mut child_2 = BoundedVector::clone(parent_2);
+
+        // Apply arithmetic average on allele of parents for allele of offspring
+        let allele = rng.gen_range(0..length);
+
+        // Child 1
+        cross_val =
+            self.alpha * parent_2.value[allele] + (1.0 - self.alpha) * parent_1.value[allele];
+
+        child_1.value[allele] = cross_val;
+
+        // Child 2
+        cross_val =
+            self.alpha * parent_1.value[allele] + (1.0 - self.alpha) * parent_2.value[allele];
+
+        child_2.value[allele] = cross_val;
+
+        [child_1, child_2]
+    }
 }
 
 /// Applies single arithmetic recombination on a [`Vec<Individual<f64>>`].

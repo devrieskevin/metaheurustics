@@ -8,6 +8,7 @@ pub trait Parameter<const N: usize> {
         Self: Sized;
 }
 
+#[derive(Clone)]
 pub struct BoundedVector<T>
 where
     T: PartialOrd,
