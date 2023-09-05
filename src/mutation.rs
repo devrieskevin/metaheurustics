@@ -1,5 +1,5 @@
 use rand::Rng;
-use rand_distr::{Normal, Uniform};
+use rand_distr::{uniform::SampleUniform, Normal, Uniform};
 
 use crate::{individual::BasicIndividual, parameter::BoundedVector};
 
@@ -19,17 +19,20 @@ impl UniformMutator {
     }
 }
 
-impl Mutator<BoundedVector<f64>> for UniformMutator {
+impl<T> Mutator<BoundedVector<T>> for UniformMutator
+where
+    T: PartialOrd + SampleUniform + Copy,
+{
     fn mutate<'a, R: Rng + ?Sized>(
         &self,
         rng: &mut R,
-        parameter: &'a mut BoundedVector<f64>,
-    ) -> &'a mut BoundedVector<f64> {
+        parameter: &'a mut BoundedVector<T>,
+    ) -> &'a mut BoundedVector<T> {
         let distribution = Uniform::new_inclusive(parameter.min_value, parameter.max_value);
         parameter.value.iter_mut().for_each(|value| {
             let random_value = rng.sample(Uniform::new(0.0, 1.0));
             if random_value <= self.probability {
-                *value = rng.sample(distribution);
+                *value = rng.sample(&distribution);
             }
         });
         parameter
