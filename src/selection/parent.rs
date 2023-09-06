@@ -6,6 +6,33 @@ use crate::{
     population::Population,
 };
 
+pub trait ParentSelector {
+    fn select<R, I, F, C>(&self, rng: &mut R, individuals: &[I], number_children: u32) -> C
+    where
+        R: Rng + ?Sized,
+        I: Individual<F>,
+        F: PartialOrd,
+        C: FromIterator<usize>;
+}
+
+pub struct UniformParentSelector;
+
+impl ParentSelector for UniformParentSelector {
+    fn select<R, I, F, C>(&self, rng: &mut R, individuals: &[I], number_children: u32) -> C
+    where
+        R: Rng + ?Sized,
+        I: Individual<F>,
+        F: PartialOrd,
+        C: FromIterator<usize>,
+    {
+        let population_size = individuals.len();
+
+        (0..number_children)
+            .map(|_| rng.gen_range(0..population_size))
+            .collect()
+    }
+}
+
 pub fn roulette_wheel<R: Rng + ?Sized>(
     rng: &mut R,
     population: &Population<f64>,
