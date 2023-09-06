@@ -15,9 +15,9 @@ pub trait ParentSelector {
         C: FromIterator<usize>;
 }
 
-pub struct UniformParentSelector;
+pub struct UniformSelector;
 
-impl ParentSelector for UniformParentSelector {
+impl ParentSelector for UniformSelector {
     fn select<R, I, F, C>(&self, rng: &mut R, individuals: &[I], number_children: u32) -> C
     where
         R: Rng + ?Sized,

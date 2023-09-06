@@ -5,6 +5,54 @@ use crate::{
     population::Population,
 };
 
+pub trait SurvivorSelector {
+    fn select<R, I, F>(&self, rng: &mut R, parents: &mut [I], offspring: Vec<I>)
+    where
+        R: Rng + ?Sized,
+        I: Individual<F>,
+        F: PartialOrd;
+}
+
+pub struct ReplaceWorstSelector {
+    replacement_rate: f64,
+}
+
+impl ReplaceWorstSelector {
+    pub fn new(replacement_rate: f64) -> Self {
+        ReplaceWorstSelector {
+            replacement_rate: replacement_rate.clamp(0.0, 1.0),
+        }
+    }
+}
+
+impl SurvivorSelector for ReplaceWorstSelector {
+    fn select<R, I, F>(&self, _rng: &mut R, population: &mut [I], offspring: Vec<I>)
+    where
+        R: Rng + ?Sized,
+        I: Individual<F>,
+        F: PartialOrd,
+    {
+        // Consume and make given offspring value mutable
+        let mut offspring = offspring;
+
+        population.sort_by(|a, b| a.compare_fitness(b));
+        offspring.sort_by(|a, b| b.compare_fitness(a));
+
+        let replacement_count = (self.replacement_rate * population.len() as f64) as usize;
+        if replacement_count > population.len() {
+            panic!("Replacement count must be less than population size");
+        }
+
+        population
+            .iter_mut()
+            .zip(offspring.into_iter())
+            .take(replacement_count)
+            .for_each(|(value, offspring)| {
+                *value = offspring;
+            });
+    }
+}
+
 pub fn replace_worst_selection(
     population: &mut Population<f64>,
     offspring: &mut Population<f64>,
