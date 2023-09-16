@@ -1,5 +1,7 @@
 use std::cmp::Ordering;
 
+use crate::parameter::BoundedVector;
+
 pub trait Individual<F>
 where
     F: PartialOrd,
@@ -96,6 +98,40 @@ impl Individual<f64> for BasicIndividual<f64> {
 
     fn age(&self) -> u32 {
         self.age
+    }
+}
+
+pub struct BoundedVectorIndividual<T, F>
+where
+    T: PartialOrd,
+    F: PartialOrd,
+{
+    vector: BoundedVector<T>,
+    fitness: F,
+    age: u32,
+}
+
+impl<T, F> Individual<F> for BoundedVectorIndividual<T, F>
+where
+    T: PartialOrd,
+    F: PartialOrd + Copy,
+{
+    fn fitness(&self) -> F {
+        self.fitness
+    }
+
+    fn age(&self) -> u32 {
+        self.age
+    }
+}
+
+impl<T, F> BoundedVectorIndividual<T, F>
+where
+    T: PartialOrd,
+    F: PartialOrd,
+{
+    pub fn vector(&self) -> &BoundedVector<T> {
+        &self.vector
     }
 }
 

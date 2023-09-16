@@ -4,7 +4,7 @@ use rand_distr::Uniform;
 use crate::{individual::BasicIndividual, parameter::BoundedVector, population::Population};
 
 pub trait Recombinator<T, const N: usize> {
-    fn recombine<R: Rng + ?Sized>(&self, rng: &mut R, parents: &[T; N]) -> [T; N];
+    fn recombine<R: Rng + ?Sized>(&self, rng: &mut R, parents: &[&T; N]) -> [T; N];
 }
 
 pub struct SingleArithmetic {
@@ -23,7 +23,7 @@ impl Recombinator<BoundedVector<f64>, 2> for SingleArithmetic {
     fn recombine<R: Rng + ?Sized>(
         &self,
         rng: &mut R,
-        parents: &[BoundedVector<f64>; 2],
+        parents: &[&BoundedVector<f64>; 2],
     ) -> [BoundedVector<f64>; 2] {
         let [parent_1, parent_2] = parents;
         let length = usize::min(parent_1.value.len(), parent_2.value.len());

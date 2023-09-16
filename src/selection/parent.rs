@@ -7,7 +7,7 @@ use crate::{
 };
 
 pub trait ParentSelector {
-    fn select<R, I, F, C>(&self, rng: &mut R, individuals: &[I], number_children: u32) -> C
+    fn select<R, I, F, C>(&self, rng: &mut R, individuals: &[I], number_children: usize) -> C
     where
         R: Rng + ?Sized,
         I: Individual<F>,
@@ -17,8 +17,20 @@ pub trait ParentSelector {
 
 pub struct UniformSelector;
 
+impl UniformSelector {
+    pub fn new() -> Self {
+        UniformSelector
+    }
+}
+
+impl Default for UniformSelector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ParentSelector for UniformSelector {
-    fn select<R, I, F, C>(&self, rng: &mut R, individuals: &[I], number_children: u32) -> C
+    fn select<R, I, F, C>(&self, rng: &mut R, individuals: &[I], number_children: usize) -> C
     where
         R: Rng + ?Sized,
         I: Individual<F>,
