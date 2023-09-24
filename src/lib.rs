@@ -12,7 +12,8 @@ mod tests {
     use rand::{rngs::StdRng, SeedableRng};
 
     use crate::{
-        benchmark::bent_cigar, mutation, population::Population, recombination, selection,
+        benchmark::bent_cigar, individual::Individual, mutation, population::BasicPopulation,
+        recombination, selection,
     };
 
     #[test]
@@ -24,7 +25,7 @@ mod tests {
         let replacement_rate = 0.9;
 
         // Initialize population
-        let mut population = Population::new(&mut rng, -100.0, 100.0, 10, 1000);
+        let mut population = BasicPopulation::new(&mut rng, -100.0, 100.0, 10, 1000);
 
         // Set fitness
         population.individuals.iter_mut().for_each(|individual| {

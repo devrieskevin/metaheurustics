@@ -3,7 +3,7 @@ use rand_distr::{Uniform, WeightedIndex};
 
 use crate::{
     individual::{BasicIndividual, Individual},
-    population::Population,
+    population::BasicPopulation,
 };
 
 pub trait ParentSelector {
@@ -47,10 +47,10 @@ impl ParentSelector for UniformSelector {
 
 pub fn roulette_wheel<R: Rng + ?Sized>(
     rng: &mut R,
-    population: &Population<f64>,
+    population: &BasicPopulation<f64>,
     number_children: usize,
     weights: &[f64],
-) -> Population<f64> {
+) -> BasicPopulation<f64> {
     let dist = WeightedIndex::new(weights).unwrap();
     let individuals = rng
         .sample_iter(dist)
@@ -58,16 +58,16 @@ pub fn roulette_wheel<R: Rng + ?Sized>(
         .map(|i| population.individuals[i].clone())
         .collect();
 
-    Population::new_from_individuals(individuals)
+    BasicPopulation::new_from_individuals(individuals)
 }
 
 /// Selects parents from a population using the stochastic universal sampling method.
 pub fn stochastic_universal_sampling<R: Rng + ?Sized>(
     rng: &mut R,
-    population: &Population<f64>,
+    population: &BasicPopulation<f64>,
     number_children: usize,
     probabilities: &[f64],
-) -> Population<f64> {
+) -> BasicPopulation<f64> {
     let cumulative_probabilities = probabilities
         .iter()
         .scan(0.0, |state, x| {
@@ -85,11 +85,14 @@ pub fn stochastic_universal_sampling<R: Rng + ?Sized>(
         }
     }
 
-    Population::new_from_individuals(selection)
+    BasicPopulation::new_from_individuals(selection)
 }
 
 /// Selects parents from a population using uniform selection.
-pub fn uniform<R: Rng + ?Sized>(rng: &mut R, population: &Population<f64>) -> Population<f64> {
+pub fn uniform<R: Rng + ?Sized>(
+    rng: &mut R,
+    population: &BasicPopulation<f64>,
+) -> BasicPopulation<f64> {
     let population_size = population.individuals.len();
 
     let selection = (0..population_size)
@@ -97,17 +100,17 @@ pub fn uniform<R: Rng + ?Sized>(rng: &mut R, population: &Population<f64>) -> Po
         .map(|i| population.individuals[i].clone())
         .collect();
 
-    Population::new_from_individuals(selection)
+    BasicPopulation::new_from_individuals(selection)
 }
 
 /// Selects parents from a population using tournament selection.
 pub fn tournament<R: Rng + ?Sized>(
     rng: &mut R,
-    population: &Population<f64>,
+    population: &BasicPopulation<f64>,
     tournament_size: usize,
     number_accepted: usize,
     number_children: usize,
-) -> Population<f64> {
+) -> BasicPopulation<f64> {
     let min_value = population.individuals[0].min_value;
     let max_value = population.individuals[0].max_value;
     let length = population.individuals[0].value.len();
@@ -133,16 +136,16 @@ pub fn tournament<R: Rng + ?Sized>(
         }
     }
 
-    Population::new_from_individuals(mating_pool)
+    BasicPopulation::new_from_individuals(mating_pool)
 }
 
 /// Selects parents from a population using the fitness proportionate selection method.
 /// Due to stochastic noise, `stochastic_universal_sampling` is recommended over this method.
 pub fn fitness_proportionate_selection<R: Rng + ?Sized>(
     rng: &mut R,
-    population: &Population<f64>,
+    population: &BasicPopulation<f64>,
     number_children: usize,
-) -> Population<f64> {
+) -> BasicPopulation<f64> {
     let minimum_fitness = population
         .individuals
         .iter()
@@ -174,10 +177,10 @@ pub fn fitness_proportionate_selection<R: Rng + ?Sized>(
 /// Selects parents from a population using linear ranking selection.
 pub fn linear_ranking<R: Rng + ?Sized>(
     rng: &mut R,
-    population: &mut Population<f64>,
+    population: &mut BasicPopulation<f64>,
     s: f64,
     number_children: usize,
-) -> Population<f64> {
+) -> BasicPopulation<f64> {
     let length = population.individuals.first().unwrap().value.len();
     let mu: f64 = length as f64;
 
@@ -194,9 +197,9 @@ pub fn linear_ranking<R: Rng + ?Sized>(
 
 pub fn exponential_ranking<R: Rng + ?Sized>(
     rng: &mut R,
-    population: &mut Population<f64>,
+    population: &mut BasicPopulation<f64>,
     number_children: usize,
-) -> Population<f64> {
+) -> BasicPopulation<f64> {
     let length = population.individuals.first().unwrap().value.len();
 
     // Sort group based on fitness for ranking

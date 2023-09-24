@@ -8,11 +8,15 @@ where
 {
     fn fitness(&self) -> F;
 
+    fn set_fitness(&mut self, fitness: F) -> &mut Self;
+
     fn compare_fitness(&self, other: &Self) -> Ordering {
         F::partial_cmp(&self.fitness(), &other.fitness()).unwrap()
     }
 
     fn age(&self) -> u32;
+
+    fn set_age(&mut self, age: u32) -> &mut Self;
 
     fn compare_age(&self, other: &Self) -> Ordering {
         u32::cmp(&self.age(), &other.age())
@@ -73,12 +77,6 @@ impl BasicIndividual<f64> {
         self
     }
 
-    /// Sets the fitness of this [`Individual<f64>`].
-    pub fn set_fitness(&mut self, fitness: f64) -> &mut Self {
-        self.fitness = fitness;
-        self
-    }
-
     /// Compares the wins of this [`Individual<f64>`] with another [`Individual<f64>`].
     pub fn compare_wins(&self, other: &BasicIndividual<f64>) -> Ordering {
         self.wins.cmp(&other.wins)
@@ -96,8 +94,19 @@ impl Individual<f64> for BasicIndividual<f64> {
         self.fitness
     }
 
+    /// Sets the fitness of this [`Individual<f64>`].
+    fn set_fitness(&mut self, fitness: f64) -> &mut Self {
+        self.fitness = fitness;
+        self
+    }
+
     fn age(&self) -> u32 {
         self.age
+    }
+
+    fn set_age(&mut self, age: u32) -> &mut Self {
+        self.age = age;
+        self
     }
 }
 
@@ -120,8 +129,18 @@ where
         self.fitness
     }
 
+    fn set_fitness(&mut self, fitness: F) -> &mut Self {
+        self.fitness = fitness;
+        self
+    }
+
     fn age(&self) -> u32 {
         self.age
+    }
+
+    fn set_age(&mut self, age: u32) -> &mut Self {
+        self.age = age;
+        self
     }
 }
 

@@ -1,7 +1,7 @@
 use rand::Rng;
 use rand_distr::Uniform;
 
-use crate::{individual::BasicIndividual, parameter::BoundedVector, population::Population};
+use crate::{individual::BasicIndividual, parameter::BoundedVector, population::BasicPopulation};
 
 pub trait Recombinator<T, const N: usize> {
     fn recombine<R: Rng + ?Sized>(&self, rng: &mut R, parents: &[&T; N]) -> [T; N];
@@ -57,7 +57,7 @@ pub fn single_arithmetic<R: Rng + ?Sized>(
     rng: &mut R,
     mating_pool: Vec<BasicIndividual<f64>>,
     alpha: f64,
-) -> Population<f64> {
+) -> BasicPopulation<f64> {
     let mut offspring = Vec::with_capacity(mating_pool.len());
 
     let min_val = mating_pool[0].min_value;
@@ -110,7 +110,7 @@ pub fn single_arithmetic<R: Rng + ?Sized>(
         offspring.push(child_2);
     }
 
-    Population::new_from_individuals(offspring)
+    BasicPopulation::new_from_individuals(offspring)
 }
 
 /// Applies simple arithmetic recombination on a [`&[Individual<f64>]`].
@@ -118,7 +118,7 @@ pub fn simple_arithmetic(
     mating_pool: &[BasicIndividual<f64>],
     alpha: f64,
     cross_point: usize,
-) -> Population<f64> {
+) -> BasicPopulation<f64> {
     let min_value = mating_pool[0].min_value;
     let max_value = mating_pool[0].max_value;
     let value_length = mating_pool[0].value.len();
@@ -148,7 +148,7 @@ pub fn simple_arithmetic(
         }
     }
 
-    Population::new_from_individuals(offspring)
+    BasicPopulation::new_from_individuals(offspring)
 }
 
 /// Applies blend crossover on a [`&[Individual<f64>]`].
@@ -156,7 +156,7 @@ pub fn blend_crossover<R: Rng + ?Sized>(
     rng: &mut R,
     mating_pool: Vec<BasicIndividual<f64>>,
     alpha: f64,
-) -> Population<f64> {
+) -> BasicPopulation<f64> {
     let min_value = mating_pool[0].min_value;
     let max_value = mating_pool[0].max_value;
     let value_length = mating_pool[0].value.len();
@@ -185,5 +185,5 @@ pub fn blend_crossover<R: Rng + ?Sized>(
         }
     }
 
-    Population::new_from_individuals(offspring)
+    BasicPopulation::new_from_individuals(offspring)
 }
