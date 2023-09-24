@@ -35,6 +35,10 @@ where
         }
     }
 
+    pub fn individuals(&self) -> &[I] {
+        &self.individuals
+    }
+
     pub fn set_fitnesses(&mut self, fitnesses: &[F]) {
         if fitnesses.len() != self.individuals.len() {
             panic!("Length of fitnesses must be equal to the size of the population.");
@@ -77,8 +81,11 @@ where
 
         let mut split_islands = archipelago.split_first_mut();
         while let Some((head, tail)) = split_islands {
-            head.individuals[..number_swap]
-                .swap_with_slice(&mut tail[0].individuals[..number_swap]);
+            match tail.first_mut() {
+                Some(next) => head.individuals[..number_swap]
+                    .swap_with_slice(&mut next.individuals[..number_swap]),
+                None => break,
+            };
             split_islands = tail.split_first_mut();
         }
     }
