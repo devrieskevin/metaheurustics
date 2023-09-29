@@ -39,6 +39,10 @@ where
         &self.individuals
     }
 
+    pub fn individuals_mut(&mut self) -> &mut [I] {
+        &mut self.individuals
+    }
+
     pub fn set_fitnesses(&mut self, fitnesses: &[F]) {
         if fitnesses.len() != self.individuals.len() {
             panic!("Length of fitnesses must be equal to the size of the population.");
