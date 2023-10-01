@@ -1,6 +1,7 @@
 pub mod benchmark;
 pub mod individual;
 pub mod mutation;
+pub mod parameter;
 pub mod population;
 pub mod recombination;
 pub mod samplers;
@@ -11,7 +12,17 @@ mod tests {
     use rand::{rngs::StdRng, SeedableRng};
 
     use crate::{
-        benchmark::bent_cigar, mutation, population::Population, recombination, selection,
+        benchmark::bent_cigar,
+        individual::{
+            BoundedVectorIndividualMutator, BoundedVectorIndividualRecombinator, Individual,
+        },
+        mutation::{Mutator, UniformMutator},
+        population::Population,
+        recombination::{Recombinator, SingleArithmetic},
+        selection::{
+            parent::{ParentSelector, UniformSelector},
+            survivor::{ReplaceWorstSelector, SurvivorSelector},
+        },
     };
 
     #[test]
@@ -22,49 +33,57 @@ mod tests {
         let mutation_probability = 0.01;
         let replacement_rate = 0.9;
 
+        let parent_selector = UniformSelector::new();
+        let recombinator = BoundedVectorIndividualRecombinator::new(SingleArithmetic::new(alpha));
+        let mutator =
+            BoundedVectorIndividualMutator::new(UniformMutator::new(mutation_probability));
+        let survivor_selector = ReplaceWorstSelector::new(replacement_rate);
+
         // Initialize population
         let mut population = Population::new(&mut rng, -100.0, 100.0, 10, 1000);
 
         // Set fitness
-        population.individuals.iter_mut().for_each(|individual| {
-            individual.set_fitness(evaluation_func(&individual.value));
-        });
+        population
+            .individuals_mut()
+            .iter_mut()
+            .for_each(|individual| {
+                individual.set_fitness(evaluation_func(&individual.vector().value));
+            });
 
         let mut last_max_fitness = population
-            .individuals
+            .individuals()
             .iter()
-            .map(|individual| individual.fitness)
+            .map(|individual| individual.fitness())
             .max_by(|a, b| a.total_cmp(b))
             .unwrap();
         for _ in 0..100 {
             // Parent selection
-            let mating_pool = selection::parent::fitness_proportionate_selection(
+            let mating_pool: Vec<_> = parent_selector.select(
                 &mut rng,
-                &population,
-                population.individuals.len(),
+                population.individuals(),
+                population.individuals().len(),
             );
 
             // Generate offspring
-            let mut offspring =
-                recombination::single_arithmetic(&mut rng, mating_pool.individuals, alpha);
-            mutation::uniform(&mut rng, mutation_probability, &mut offspring.individuals);
+            let mut offspring: Vec<_> = mating_pool
+                .chunks(2)
+                .map(|x| x.iter().map(|y| &population.individuals()[*y]).collect())
+                .flat_map(|x: Vec<_>| recombinator.recombine(&mut rng, x[..].try_into().unwrap()))
+                .collect();
 
-            // Set offspring fitness
-            offspring.individuals.iter_mut().for_each(|individual| {
-                individual.set_fitness(evaluation_func(&individual.value));
+            // Mutate offspring and set offspring fitness
+            offspring.iter_mut().for_each(|individual| {
+                mutator.mutate(&mut rng, individual);
+                individual.set_fitness(evaluation_func(&individual.vector().value));
             });
 
             // Select survivors
-            selection::survivor::replace_worst_selection(
-                &mut population,
-                &mut offspring,
-                replacement_rate,
-            );
+            survivor_selector.select(&mut rng, population.individuals_mut(), offspring);
 
             let max_fitness = population
-                .individuals
+                .individuals()
                 .iter()
-                .map(|individual| individual.fitness)
+                .map(|individual| individual.fitness())
                 .max_by(|a, b| a.total_cmp(b))
                 .unwrap();
 

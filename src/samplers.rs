@@ -63,8 +63,7 @@ mod tests {
         n_samples: usize,
         tolerance: f64,
     ) {
-        let samples: Vec<Vec<f64>> =
-            sample_multivariate_gaussian(rng, &mean, &covariance, n_samples);
+        let samples: Vec<Vec<f64>> = sample_multivariate_gaussian(rng, mean, covariance, n_samples);
         let sample_matrix =
             DMatrix::from_row_iterator(n_samples, mean.len(), samples.into_iter().flatten());
 
@@ -85,7 +84,7 @@ mod tests {
 
         let sample_covariance_matrix = calculate_sample_covariance(sample_matrix);
 
-        let covariance_matrix = DMatrix::from_row_slice(mean.len(), mean.len(), &covariance);
+        let covariance_matrix = DMatrix::from_row_slice(mean.len(), mean.len(), covariance);
         let covariance_error = (&sample_covariance_matrix - &covariance_matrix)
             .abs()
             .mean();
@@ -105,12 +104,11 @@ mod tests {
         let covariance: Vec<f64> = [[0; SIZE]; SIZE]
             .iter()
             .enumerate()
-            .map(|(i, a)| {
-                let mut clone = a.clone();
+            .flat_map(|(i, a)| {
+                let mut clone = *a;
                 clone[i] = 1;
                 clone
             })
-            .flatten()
             .map(|i| i as f64)
             .collect();
         let mut rng: StdRng = SeedableRng::seed_from_u64(1234);
