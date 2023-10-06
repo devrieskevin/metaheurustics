@@ -24,6 +24,12 @@ enum GroupType {
     Offspring,
 }
 
+impl GroupType {
+    pub fn is_population(&self) -> bool {
+        matches!(self, Self::Population)
+    }
+}
+
 struct TournamentCandidate<F>
 where
     F: PartialOrd,
@@ -155,7 +161,7 @@ impl SurvivorSelector for RoundRobinTournament {
         let (population_winners, offspring_winners): (Vec<_>, Vec<_>) = candidates
             .iter()
             .take(population.len())
-            .partition(|x| x.group_type == GroupType::Population);
+            .partition(|x| x.group_type.is_population());
 
         let population_winners_set: HashSet<_> =
             population_winners.iter().map(|x| x.candidate).collect();
@@ -177,6 +183,86 @@ impl SurvivorSelector for RoundRobinTournament {
         // Insert survivors into population
         population_loser_refs
             .zip(offspring_winner_refs)
+            .for_each(|(a, b)| swap(a, b));
+    }
+}
+
+pub struct MergeRanked;
+
+impl SurvivorSelector for MergeRanked {
+    fn select<R, I, F>(&self, _rng: &mut R, population: &mut [I], offspring: Vec<I>)
+    where
+        R: Rng + ?Sized,
+        I: Individual<F>,
+        F: PartialOrd,
+    {
+        let mut offspring = offspring;
+
+        let offspring_candidates = offspring
+            .iter()
+            .enumerate()
+            .map(|(i, x)| (i, GroupType::Offspring, x.fitness()));
+        let mut candidates: Vec<_> = population
+            .iter()
+            .enumerate()
+            .map(|(i, x)| (i, GroupType::Offspring, x.fitness()))
+            .chain(offspring_candidates)
+            .collect();
+
+        candidates.sort_by(|(_, _, a), (_, _, b)| b.partial_cmp(a).unwrap());
+
+        let (population_winners, offspring_winners): (Vec<_>, Vec<_>) = candidates
+            .into_iter()
+            .take(population.len())
+            .partition(|(_, group_type, _)| group_type.is_population());
+
+        let population_winners_set: HashSet<_> =
+            population_winners.into_iter().map(|(i, _, _)| i).collect();
+        let offspring_winners_set: HashSet<_> =
+            offspring_winners.into_iter().map(|(i, _, _)| i).collect();
+
+        let offspring_winner_refs = offspring
+            .iter_mut()
+            .enumerate()
+            .filter(|(i, _)| offspring_winners_set.contains(i))
+            .map(|(_, x)| x);
+
+        let population_loser_refs = population
+            .iter_mut()
+            .enumerate()
+            .filter(|(i, _)| !population_winners_set.contains(i))
+            .map(|(_, x)| x);
+
+        // Insert survivors into population
+        population_loser_refs
+            .zip(offspring_winner_refs)
+            .for_each(|(a, b)| swap(a, b));
+    }
+}
+
+pub struct GenerationalRanked;
+
+impl SurvivorSelector for GenerationalRanked {
+    fn select<R, I, F>(&self, _rng: &mut R, population: &mut [I], offspring: Vec<I>)
+    where
+        R: Rng + ?Sized,
+        I: Individual<F>,
+        F: PartialOrd,
+    {
+        let population_size = population.len();
+        let offspring_size = offspring.len();
+        assert!(
+            population_size <= offspring_size,
+            "The population size ({}) should have a smaller or equal size with respect to the amount of offspring ({})",
+            population_size,
+            offspring_size
+        );
+
+        let mut offspring = offspring;
+        offspring.sort_by(|a, b| b.compare_fitness(a));
+        population
+            .iter_mut()
+            .zip(offspring.iter_mut())
             .for_each(|(a, b)| swap(a, b));
     }
 }
