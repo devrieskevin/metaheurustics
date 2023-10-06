@@ -1,4 +1,9 @@
-use rand::{seq::SliceRandom, Rng};
+use std::{cmp::Ordering, collections::HashSet, mem::swap};
+
+use rand::{
+    seq::{IteratorRandom, SliceRandom},
+    Rng,
+};
 
 use crate::{
     individual::{BasicIndividual, Individual},
@@ -6,11 +11,54 @@ use crate::{
 };
 
 pub trait SurvivorSelector {
-    fn select<R, I, F>(&self, rng: &mut R, parents: &mut [I], offspring: Vec<I>)
+    fn select<R, I, F>(&self, rng: &mut R, population: &mut [I], offspring: Vec<I>)
     where
         R: Rng + ?Sized,
         I: Individual<F>,
         F: PartialOrd;
+}
+
+#[derive(PartialEq)]
+enum GroupType {
+    Population,
+    Offspring,
+}
+
+struct TournamentCandidate<F>
+where
+    F: PartialOrd,
+{
+    pub candidate: usize,
+    pub group_type: GroupType,
+    wins: u32,
+    fitness: F,
+}
+
+impl<F> TournamentCandidate<F>
+where
+    F: PartialOrd,
+{
+    pub fn new(candidate: usize, group_type: GroupType, fitness: F) -> Self {
+        Self {
+            candidate,
+            group_type,
+            wins: 0,
+            fitness,
+        }
+    }
+
+    pub fn compete(&mut self, other: &Self) -> &mut Self {
+        self.wins += match self.fitness > other.fitness {
+            true => 1,
+            false => 0,
+        };
+
+        self
+    }
+
+    pub fn compare_wins(&self, other: &Self) -> Ordering {
+        self.wins.cmp(&other.wins)
+    }
 }
 
 pub struct ReplaceWorstSelector {
@@ -50,6 +98,86 @@ impl SurvivorSelector for ReplaceWorstSelector {
             .for_each(|(value, offspring)| {
                 *value = offspring;
             });
+    }
+}
+
+pub struct RoundRobinTournament {
+    number_rivals: usize,
+}
+
+impl SurvivorSelector for RoundRobinTournament {
+    fn select<R, I, F>(&self, rng: &mut R, population: &mut [I], offspring: Vec<I>)
+    where
+        R: Rng + ?Sized,
+        I: Individual<F>,
+        F: PartialOrd,
+    {
+        let mut offspring = offspring;
+
+        let population_candidates = population
+            .iter()
+            .enumerate()
+            .map(|(i, x)| TournamentCandidate::new(i, GroupType::Population, x.fitness()));
+
+        let mut candidates: Vec<_> = offspring
+            .iter()
+            .enumerate()
+            .map(|(i, x)| TournamentCandidate::new(i, GroupType::Offspring, x.fitness()))
+            .chain(population_candidates)
+            .collect();
+
+        let merged_size = candidates.len();
+        // Determine wins in tournament
+        for n in 0..merged_size {
+            let (left, rest) = candidates.split_at_mut(n);
+            let (candidate, right) = rest.split_first_mut().unwrap();
+
+            let rivals = (0..merged_size)
+                .choose_multiple(rng, merged_size)
+                .into_iter()
+                // Candidate does not battle itself
+                .filter(|rival| *rival != n - 1)
+                .take(self.number_rivals);
+
+            for m in rivals {
+                let rival = match m {
+                    m if m < n - 1 => &left[m],
+                    m if m > n - 1 => &right[m - n],
+                    _ => panic!("Should not be happening"),
+                };
+                candidate.compete(rival);
+            }
+        }
+
+        // Sort based on wins
+        candidates.sort_by(|a, b| b.compare_wins(a));
+
+        let (population_winners, offspring_winners): (Vec<_>, Vec<_>) = candidates
+            .iter()
+            .take(population.len())
+            .partition(|x| x.group_type == GroupType::Population);
+
+        let population_winners_set: HashSet<_> =
+            population_winners.iter().map(|x| x.candidate).collect();
+        let offspring_winners_set: HashSet<_> =
+            offspring_winners.iter().map(|x| x.candidate).collect();
+
+        let offspring_winner_refs = offspring
+            .iter_mut()
+            .enumerate()
+            .filter(|(i, _)| offspring_winners_set.contains(i))
+            .map(|(_, x)| x);
+
+        let population_loser_refs = population
+            .iter_mut()
+            .enumerate()
+            .filter(|(i, _)| !population_winners_set.contains(i))
+            .map(|(_, x)| x);
+
+        // Insert survivors into population
+        population_loser_refs
+            .zip(offspring_winner_refs)
+            .for_each(|(a, b)| swap(a, b));
     }
 }
 
