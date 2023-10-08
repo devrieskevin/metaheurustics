@@ -67,7 +67,7 @@ mod tests {
             // Generate offspring
             let mut offspring: Vec<_> = mating_pool
                 .chunks(2)
-                .map(|x| x.iter().map(|y| &population.individuals()[*y]).collect())
+                .map(|x| x.iter().map(|y| *y).collect())
                 .flat_map(|x: Vec<_>| recombinator.recombine(&mut rng, x[..].try_into().unwrap()))
                 .collect();
 
