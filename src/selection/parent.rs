@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::{seq::index, Rng};
 use rand_distr::{Uniform, WeightedIndex};
 
 use crate::{
@@ -171,16 +171,21 @@ where
     }
 }
 
+pub enum TournamentSampleMethod {
+    WithReplacement,
+    WithoutReplacement,
+}
+
 pub struct Tournament {
-    _tournament_size: usize,
-    _number_accepted: usize,
+    tournament_size: usize,
+    sample_method: TournamentSampleMethod,
 }
 
 impl Tournament {
-    pub fn new(tournament_size: usize, number_accepted: usize) -> Self {
+    pub fn new(tournament_size: usize, sample_method: TournamentSampleMethod) -> Self {
         Self {
-            _tournament_size: tournament_size,
-            _number_accepted: number_accepted,
+            tournament_size,
+            sample_method,
         }
     }
 }
@@ -189,13 +194,32 @@ impl<F> ParentSelector<F> for Tournament
 where
     F: PartialOrd,
 {
-    fn select<'a, R, I, C>(&self, _rng: &mut R, _individuals: &'a [I], _number_children: usize) -> C
+    fn select<'a, R, I, C>(&self, rng: &mut R, individuals: &'a [I], number_children: usize) -> C
     where
         R: Rng + ?Sized,
         I: Individual<F>,
         C: FromIterator<&'a I>,
     {
-        todo!()
+        let length = individuals.len();
+
+        let mut sampler = || match self.sample_method {
+            TournamentSampleMethod::WithReplacement => (0..self.tournament_size)
+                .map(|_x| rng.gen_range(0..length))
+                .collect(),
+            TournamentSampleMethod::WithoutReplacement => {
+                index::sample(rng, length, self.tournament_size).into_vec()
+            }
+        };
+
+        let play_tournament = |_x| {
+            sampler()
+                .into_iter()
+                .map(|i| &individuals[i])
+                .max_by(|a, b| a.compare_fitness(b))
+                .unwrap()
+        };
+
+        (0..number_children).map(play_tournament).collect()
     }
 }
 
