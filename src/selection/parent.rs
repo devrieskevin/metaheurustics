@@ -1,5 +1,6 @@
+use itertools::Itertools;
 use rand::{seq::index, Rng};
-use rand_distr::{Uniform, WeightedIndex};
+use rand_distr::{Bernoulli, Uniform, WeightedIndex};
 
 use crate::{
     individual::{BasicIndividual, Individual},
@@ -179,14 +180,97 @@ pub enum TournamentSampleMethod {
 pub struct Tournament {
     tournament_size: usize,
     sample_method: TournamentSampleMethod,
+    acceptance_probability: f64,
 }
 
 impl Tournament {
-    pub fn new(tournament_size: usize, sample_method: TournamentSampleMethod) -> Self {
+    pub fn new(
+        tournament_size: usize,
+        sample_method: TournamentSampleMethod,
+        acceptance_probability: f64,
+    ) -> Self {
+        assert!(
+            (0.0..=1.0).contains(&acceptance_probability),
+            "The stochastic tournament result type value should be a valid probability."
+        );
+
         Self {
             tournament_size,
             sample_method,
+            acceptance_probability,
         }
+    }
+
+    fn sample_candidates<R>(&self, rng: &mut R, length: usize) -> Vec<usize>
+    where
+        R: Rng + ?Sized,
+    {
+        match self.sample_method {
+            TournamentSampleMethod::WithReplacement => (0..self.tournament_size)
+                .map(|_x| rng.gen_range(0..length))
+                .collect(),
+            TournamentSampleMethod::WithoutReplacement => {
+                index::sample(rng, length, self.tournament_size).into_vec()
+            }
+        }
+    }
+
+    fn play_deterministic_tournament<'a, R, I, F, C>(
+        &self,
+        rng: &mut R,
+        individuals: &'a [I],
+        number_children: usize,
+    ) -> C
+    where
+        R: Rng + ?Sized,
+        I: Individual<F>,
+        F: PartialOrd,
+        C: FromIterator<&'a I>,
+    {
+        let length = individuals.len();
+
+        let play_tournament = |_x| {
+            self.sample_candidates(rng, length)
+                .into_iter()
+                .map(|i| &individuals[i])
+                .max_by(|a, b| a.compare_fitness(b))
+                .unwrap()
+        };
+
+        (0..number_children).map(play_tournament).collect()
+    }
+
+    fn play_stochastic_tournament<'a, R, I, F, C>(
+        &self,
+        rng: &mut R,
+        individuals: &'a [I],
+        number_children: usize,
+    ) -> C
+    where
+        R: Rng + ?Sized,
+        I: Individual<F>,
+        F: PartialOrd,
+        C: FromIterator<&'a I>,
+    {
+        let length = individuals.len();
+        let distribution = Bernoulli::new(self.acceptance_probability).unwrap();
+
+        let play_tournament = |_x| {
+            let mut candidates: Vec<_> = self
+                .sample_candidates(rng, length)
+                .into_iter()
+                .map(|i| &individuals[i])
+                .collect();
+
+            candidates.sort_by(|a, b| b.compare_fitness(a));
+
+            candidates
+                .into_iter()
+                .find_or_last(|_x| rng.sample(distribution))
+                .unwrap()
+        };
+
+        (0..number_children).map(play_tournament).collect()
     }
 }
 
@@ -200,26 +284,11 @@ where
         I: Individual<F>,
         C: FromIterator<&'a I>,
     {
-        let length = individuals.len();
-
-        let mut sampler = || match self.sample_method {
-            TournamentSampleMethod::WithReplacement => (0..self.tournament_size)
-                .map(|_x| rng.gen_range(0..length))
-                .collect(),
-            TournamentSampleMethod::WithoutReplacement => {
-                index::sample(rng, length, self.tournament_size).into_vec()
-            }
-        };
-
-        let play_tournament = |_x| {
-            sampler()
-                .into_iter()
-                .map(|i| &individuals[i])
-                .max_by(|a, b| a.compare_fitness(b))
-                .unwrap()
-        };
-
-        (0..number_children).map(play_tournament).collect()
+        if self.acceptance_probability == 1.0 {
+            self.play_deterministic_tournament(rng, individuals, number_children)
+        } else {
+            self.play_stochastic_tournament(rng, individuals, number_children)
+        }
     }
 }
 
