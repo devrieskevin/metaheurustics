@@ -40,6 +40,35 @@ where
     }
 }
 
+pub struct SimpleGaussian<T> {
+    std: T,
+}
+
+impl<T> SimpleGaussian<T> {
+    pub fn new(std: T) -> Self {
+        Self { std }
+    }
+}
+
+impl Mutator<BoundedVector<f64>> for SimpleGaussian<f64> {
+    fn mutate<'a, R: Rng + ?Sized>(
+        &self,
+        rng: &mut R,
+        parameter: &'a mut BoundedVector<f64>,
+    ) -> &'a mut BoundedVector<f64> {
+        let distribution = Normal::new(0.0, self.std).unwrap();
+        parameter
+            .value
+            .iter_mut()
+            .zip(rng.sample_iter(distribution))
+            .for_each(|(value, mutation)| {
+                *value = (*value + mutation).clamp(parameter.min_value, parameter.max_value);
+            });
+
+        parameter
+    }
+}
+
 #[allow(deprecated)]
 #[deprecated(note = "Uses `BasicPopulation` struct prototype. Use `UniformMutator` instead")]
 /// Mutate the given children using the uniform mutation method.
