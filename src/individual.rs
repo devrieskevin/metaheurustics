@@ -266,8 +266,6 @@ where
 mod tests {
     use super::*;
 
-    #[allow(deprecated)]
-    #[deprecated(note = "Uses `BasicIndividual` struct prototype.")]
     #[test]
     fn test_individual_creation() {
         let individual = BasicIndividual::new(0.0, 1.0, vec![0.5], vec![0.1]);
@@ -283,8 +281,6 @@ mod tests {
         assert_eq!(individual, test_individual);
     }
 
-    #[allow(deprecated)]
-    #[deprecated(note = "Uses `BasicIndividual` struct prototype.")]
     #[test]
     fn test_individual_set_fitness() {
         let mut individual = BasicIndividual::new(0.0, 1.0, vec![0.5], vec![0.1]);

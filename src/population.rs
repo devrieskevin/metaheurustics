@@ -242,8 +242,6 @@ mod tests {
 
     use super::*;
 
-    #[allow(deprecated)]
-    #[deprecated(note = "Uses `BasicPopulation` struct prototype.")]
     #[test]
     fn test_population() {
         let mut rng = thread_rng();
