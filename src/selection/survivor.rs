@@ -5,6 +5,7 @@ use rand::{
     Rng,
 };
 
+#[allow(deprecated)]
 use crate::{
     individual::{BasicIndividual, Individual},
     population::BasicPopulation,
@@ -267,6 +268,8 @@ impl SurvivorSelector for GenerationalRanked {
     }
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicPopulation` struct prototype. Use `ReplaceWorst` instead.")]
 pub fn replace_worst_selection(
     population: &mut BasicPopulation<f64>,
     offspring: &mut BasicPopulation<f64>,
@@ -285,6 +288,8 @@ pub fn replace_worst_selection(
     }
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicPopulation` struct prototype. Use `RoundRobinTournament` instead.")]
 /// Selects survivors from a population using round robin tournament selection.
 pub fn round_robin_tournament<R: Rng + ?Sized>(
     rng: &mut R,
@@ -331,6 +336,8 @@ pub fn round_robin_tournament<R: Rng + ?Sized>(
     }
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicPopulation` struct prototype. Use `MergeRanked` instead.")]
 /// Selects survivors from a population using mu + lambda selection.
 pub fn merge_ranked(population: &mut BasicPopulation<f64>, offspring: &mut BasicPopulation<f64>) {
     let mut merged: Vec<BasicIndividual<f64>> = merge_populations(population, offspring);
@@ -338,6 +345,8 @@ pub fn merge_ranked(population: &mut BasicPopulation<f64>, offspring: &mut Basic
     population.individuals = merged[0..population.individuals.len()].to_vec();
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicPopulation` struct prototype. Use `GenerationalRanked` instead.")]
 /// Selects survivors from a population using (mu, lambda) selection.
 pub fn generational_ranked(
     population: &mut BasicPopulation<f64>,
@@ -347,6 +356,7 @@ pub fn generational_ranked(
     population.individuals = offspring.individuals[0..population.individuals.len()].to_vec();
 }
 
+#[allow(deprecated)]
 fn merge_populations<B: FromIterator<BasicIndividual<f64>>>(
     population: &mut BasicPopulation<f64>,
     offspring: &mut BasicPopulation<f64>,

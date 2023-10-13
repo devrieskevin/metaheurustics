@@ -1,6 +1,7 @@
 use rand::Rng;
 use rand_distr::Uniform;
 
+#[allow(deprecated)]
 use crate::{individual::BasicIndividual, parameter::BoundedVector, population::BasicPopulation};
 
 pub trait Recombinator<T, const N: usize> {
@@ -52,6 +53,8 @@ impl Recombinator<BoundedVector<f64>, 2> for SingleArithmetic {
     }
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicIndividual` struct prototype. Use `SingleArithmetic` instead.")]
 /// Applies single arithmetic recombination on a [`Vec<Individual<f64>>`].
 pub fn single_arithmetic<R: Rng + ?Sized>(
     rng: &mut R,
@@ -150,6 +153,8 @@ impl Recombinator<BoundedVector<f64>, 2> for SimpleArithmetic {
     }
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicIndividual` struct prototype. Use `SimpleArithmetic` instead.")]
 /// Applies simple arithmetic recombination on a [`&[Individual<f64>]`].
 pub fn simple_arithmetic(
     mating_pool: &[BasicIndividual<f64>],
@@ -251,6 +256,8 @@ impl Recombinator<BoundedVector<f64>, 2> for BlendCrossover {
     }
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicIndividual` struct prototype. Use `BlendCrossover` instead.")]
 /// Applies blend crossover on a [`&[Individual<f64>]`].
 pub fn blend_crossover<R: Rng + ?Sized>(
     rng: &mut R,

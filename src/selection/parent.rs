@@ -2,6 +2,7 @@ use itertools::Itertools;
 use rand::{seq::index, Rng};
 use rand_distr::{Bernoulli, Uniform, WeightedIndex};
 
+#[allow(deprecated)]
 use crate::{
     individual::{BasicIndividual, Individual},
     population::BasicPopulation,
@@ -292,6 +293,8 @@ where
     }
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicPopulation` struct prototype. Use `roulette_wheel` instead.")]
 pub fn roulette_wheel_basic<R: Rng + ?Sized>(
     rng: &mut R,
     population: &BasicPopulation<f64>,
@@ -308,6 +311,10 @@ pub fn roulette_wheel_basic<R: Rng + ?Sized>(
     BasicPopulation::new_from_individuals(individuals)
 }
 
+#[allow(deprecated)]
+#[deprecated(
+    note = "Uses `BasicPopulation` struct prototype. Use `stochastic_universal_sampling` instead."
+)]
 /// Selects parents from a population using the stochastic universal sampling method.
 pub fn stochastic_universal_sampling_basic<R: Rng + ?Sized>(
     rng: &mut R,
@@ -335,6 +342,8 @@ pub fn stochastic_universal_sampling_basic<R: Rng + ?Sized>(
     BasicPopulation::new_from_individuals(selection)
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicPopulation` struct prototype. Use `UniformSelector` instead.")]
 /// Selects parents from a population using uniform selection.
 pub fn uniform<R: Rng + ?Sized>(
     rng: &mut R,
@@ -350,6 +359,8 @@ pub fn uniform<R: Rng + ?Sized>(
     BasicPopulation::new_from_individuals(selection)
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicPopulation` struct prototype. Use `Tournament` instead.")]
 /// Selects parents from a population using tournament selection.
 pub fn tournament<R: Rng + ?Sized>(
     rng: &mut R,
@@ -386,6 +397,8 @@ pub fn tournament<R: Rng + ?Sized>(
     BasicPopulation::new_from_individuals(mating_pool)
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicPopulation` struct prototype. Use `FitnessProportionate` instead.")]
 /// Selects parents from a population using the fitness proportionate selection method.
 /// Due to stochastic noise, `stochastic_universal_sampling` is recommended over this method.
 pub fn fitness_proportionate_selection<R: Rng + ?Sized>(
@@ -421,6 +434,8 @@ pub fn fitness_proportionate_selection<R: Rng + ?Sized>(
     stochastic_universal_sampling_basic(rng, population, number_children, &probabilities)
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicPopulation` struct prototype. Use `LinearRanking` instead.")]
 /// Selects parents from a population using linear ranking selection.
 pub fn linear_ranking<R: Rng + ?Sized>(
     rng: &mut R,
@@ -442,6 +457,8 @@ pub fn linear_ranking<R: Rng + ?Sized>(
     stochastic_universal_sampling_basic(rng, population, number_children, &probabilities)
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicPopulation` struct prototype. Use `ExponentialRanking` instead.")]
 pub fn exponential_ranking<R: Rng + ?Sized>(
     rng: &mut R,
     population: &mut BasicPopulation<f64>,
