@@ -1,6 +1,7 @@
 use rand::Rng;
 use rand_distr::Uniform;
 
+#[allow(deprecated)]
 use crate::{individual::BasicIndividual, parameter::BoundedVector, population::BasicPopulation};
 
 pub trait Recombinator<T, const N: usize> {
@@ -52,6 +53,8 @@ impl Recombinator<BoundedVector<f64>, 2> for SingleArithmetic {
     }
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicIndividual` struct prototype. Use `SingleArithmetic` instead.")]
 /// Applies single arithmetic recombination on a [`Vec<Individual<f64>>`].
 pub fn single_arithmetic<R: Rng + ?Sized>(
     rng: &mut R,
@@ -113,6 +116,45 @@ pub fn single_arithmetic<R: Rng + ?Sized>(
     BasicPopulation::new_from_individuals(offspring)
 }
 
+pub struct SimpleArithmetic {
+    alpha: f64,
+    cross_point: usize,
+}
+
+impl SimpleArithmetic {
+    pub fn new(alpha: f64, cross_point: usize) -> Self {
+        Self { alpha, cross_point }
+    }
+}
+
+impl Recombinator<BoundedVector<f64>, 2> for SimpleArithmetic {
+    fn recombine<R: Rng + ?Sized>(
+        &self,
+        _rng: &mut R,
+        parents: &[&BoundedVector<f64>; 2],
+    ) -> [BoundedVector<f64>; 2] {
+        let [parent_1, parent_2] = parents;
+        let mut child_1 = BoundedVector::clone(parent_1);
+        let mut child_2 = BoundedVector::clone(parent_2);
+
+        child_1
+            .value
+            .iter_mut()
+            .zip(child_2.value.iter_mut())
+            .skip(self.cross_point)
+            .for_each(|(ref_1, ref_2)| {
+                let value_1 = *ref_1;
+                let value_2 = *ref_2;
+                *ref_1 = (1.0 - self.alpha) * value_1 + self.alpha * value_2;
+                *ref_2 = self.alpha * value_1 + (1.0 - self.alpha) * value_2;
+            });
+
+        [child_1, child_2]
+    }
+}
+
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicIndividual` struct prototype. Use `SimpleArithmetic` instead.")]
 /// Applies simple arithmetic recombination on a [`&[Individual<f64>]`].
 pub fn simple_arithmetic(
     mating_pool: &[BasicIndividual<f64>],
@@ -151,6 +193,71 @@ pub fn simple_arithmetic(
     BasicPopulation::new_from_individuals(offspring)
 }
 
+pub struct WholeArithmetic {
+    alpha: f64,
+}
+
+impl WholeArithmetic {
+    pub fn new(alpha: f64) -> Self {
+        Self { alpha }
+    }
+}
+
+impl Recombinator<BoundedVector<f64>, 2> for WholeArithmetic {
+    fn recombine<R: Rng + ?Sized>(
+        &self,
+        rng: &mut R,
+        parents: &[&BoundedVector<f64>; 2],
+    ) -> [BoundedVector<f64>; 2] {
+        SimpleArithmetic::new(self.alpha, 0).recombine(rng, parents)
+    }
+}
+
+pub struct BlendCrossover {
+    alpha: f64,
+}
+
+impl BlendCrossover {
+    pub fn new(alpha: f64) -> Self {
+        Self { alpha }
+    }
+}
+
+impl Recombinator<BoundedVector<f64>, 2> for BlendCrossover {
+    fn recombine<R: Rng + ?Sized>(
+        &self,
+        rng: &mut R,
+        parents: &[&BoundedVector<f64>; 2],
+    ) -> [BoundedVector<f64>; 2] {
+        let [parent_1, parent_2] = parents;
+        let mut child_1 = BoundedVector::clone(parent_1);
+        let mut child_2 = BoundedVector::clone(parent_2);
+
+        child_1
+            .value
+            .iter_mut()
+            .zip(child_2.value.iter_mut())
+            .for_each(|(ref_1, ref_2)| {
+                let value_1 = *ref_1;
+                let value_2 = *ref_2;
+                let distance = f64::abs(value_1 - value_2);
+                let min = f64::min(value_1, value_2) - self.alpha * distance;
+                let max = f64::max(value_1, value_2) + self.alpha * distance;
+                let distribution = Uniform::new(min, max);
+                *ref_1 = rng
+                    .sample(distribution)
+                    .clamp(child_1.min_value, child_1.max_value);
+                *ref_2 = rng
+                    .sample(distribution)
+                    .clamp(child_2.min_value, child_2.max_value);
+            });
+
+        [child_1, child_2]
+    }
+}
+
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicIndividual` struct prototype. Use `BlendCrossover` instead.")]
 /// Applies blend crossover on a [`&[Individual<f64>]`].
 pub fn blend_crossover<R: Rng + ?Sized>(
     rng: &mut R,

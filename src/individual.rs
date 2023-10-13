@@ -23,6 +23,8 @@ where
     }
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Too limited. Use `Individual<F>` and its implementors instead.")]
 #[derive(Debug, Clone)]
 /// Individual for numerical values
 pub struct BasicIndividual<T> {
@@ -35,6 +37,8 @@ pub struct BasicIndividual<T> {
     pub wins: u32,
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicIndividual` struct prototype.")]
 /// NumericIndividual implementation for f64
 impl BasicIndividual<f64> {
     /// Creates a new [`Individual<f64>`].
@@ -83,12 +87,14 @@ impl BasicIndividual<f64> {
     }
 }
 
+#[allow(deprecated)]
 impl PartialEq for BasicIndividual<f64> {
     fn eq(&self, other: &Self) -> bool {
         self.value == other.value
     }
 }
 
+#[allow(deprecated)]
 impl Individual<f64> for BasicIndividual<f64> {
     fn fitness(&self) -> f64 {
         self.fitness

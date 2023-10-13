@@ -1,6 +1,7 @@
 use rand::Rng;
 use rand_distr::{uniform::SampleUniform, Normal, Uniform};
 
+#[allow(deprecated)]
 use crate::{individual::BasicIndividual, parameter::BoundedVector};
 
 pub trait Mutator<T> {
@@ -39,6 +40,8 @@ where
     }
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicPopulation` struct prototype. Use `UniformMutator` instead")]
 /// Mutate the given children using the uniform mutation method.
 pub fn uniform<R: Rng + ?Sized>(
     rng: &mut R,
@@ -56,6 +59,10 @@ pub fn uniform<R: Rng + ?Sized>(
     });
 }
 
+#[allow(deprecated)]
+#[deprecated(
+    note = "Uses `BasicPopulation` struct prototype. Will be implemented as part of issue #54"
+)]
 /// Mutate the given children using simple Gaussian perturbation mutation method using individual variance(s).
 pub fn simple_gaussian<R: Rng + ?Sized>(rng: &mut R, children: &mut [BasicIndividual<f64>]) {
     children.iter_mut().for_each(|child| {
@@ -73,6 +80,10 @@ pub fn simple_gaussian<R: Rng + ?Sized>(rng: &mut R, children: &mut [BasicIndivi
     });
 }
 
+#[allow(deprecated)]
+#[deprecated(
+    note = "Uses `BasicPopulation` struct prototype. Will be implemented as part of issue #54"
+)]
 /// Mutate the given children using uncorrelated adaptive Gaussian perturbation with changing step sizes.
 pub fn uncorrelated_adaptive_gaussian<R: Rng + ?Sized>(
     rng: &mut R,

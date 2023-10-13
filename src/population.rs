@@ -3,6 +3,7 @@ use std::marker::PhantomData;
 use rand::{seq::SliceRandom, Rng};
 use rand_distr::{uniform::SampleUniform, Uniform};
 
+#[allow(deprecated)]
 use crate::{
     individual::{BasicIndividual, BoundedVectorIndividual, Individual},
     parameter::BoundedVector,
@@ -127,11 +128,15 @@ where
     }
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicIndividual` struct prototype. Use `Population<T,F>` instead.")]
 #[derive(Clone, Debug)]
 pub struct BasicPopulation<T> {
     pub individuals: Vec<BasicIndividual<T>>,
 }
 
+#[allow(deprecated)]
+#[deprecated(note = "Uses `BasicPopulation` struct prototype.")]
 impl BasicPopulation<f64> {
     /// Creates a new [`BasicPopulation<f64>`].
     pub fn new<R: Rng + ?Sized>(
