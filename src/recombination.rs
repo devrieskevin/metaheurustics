@@ -8,6 +8,35 @@ pub trait Recombinator<T, const N: usize> {
     fn recombine<R: Rng + ?Sized>(&self, rng: &mut R, parents: &[&T; N]) -> [T; N];
 }
 
+pub struct Discrete;
+
+impl Recombinator<BoundedVector<f64>, 2> for Discrete {
+    fn recombine<R: Rng + ?Sized>(
+        &self,
+        rng: &mut R,
+        parents: &[&BoundedVector<f64>; 2],
+    ) -> [BoundedVector<f64>; 2] {
+        let [parent_1, parent_2] = parents;
+
+        let mut child_1 = BoundedVector::clone(parent_1);
+        let mut child_2 = BoundedVector::clone(parent_2);
+
+        let distribution = Uniform::new_inclusive(0, 1);
+
+        child_1
+            .value
+            .iter_mut()
+            .zip(child_2.value.iter_mut())
+            .for_each(|(a, b)| {
+                let values = [*a, *b];
+                *a = values[rng.sample(distribution)];
+                *b = values[rng.sample(distribution)];
+            });
+
+        [child_1, child_2]
+    }
+}
+
 pub struct SingleArithmetic {
     alpha: f64,
 }
