@@ -1,7 +1,7 @@
 use rand::Rng;
 use rand_distr::Uniform;
 
-use crate::parameter::BoundedVector;
+use crate::parameter::{BoundedValue, BoundedVector};
 
 pub trait Recombinator<T, const N: usize> {
     fn recombine<R: Rng + ?Sized>(&self, rng: &mut R, parents: &[&T; N]) -> [T; N];
@@ -135,6 +135,27 @@ impl Recombinator<BoundedVector<f64>, 2> for WholeArithmetic {
         parents: &[&BoundedVector<f64>; 2],
     ) -> [BoundedVector<f64>; 2] {
         SimpleArithmetic::new(self.alpha, 0).recombine(rng, parents)
+    }
+}
+
+impl Recombinator<BoundedValue<f64>, 2> for WholeArithmetic {
+    fn recombine<R: Rng + ?Sized>(
+        &self,
+        _rng: &mut R,
+        parents: &[&BoundedValue<f64>; 2],
+    ) -> [BoundedValue<f64>; 2] {
+        let [parent_1, parent_2] = parents;
+
+        let mut child_1 = BoundedValue::clone(parent_1);
+        let mut child_2 = BoundedValue::clone(parent_2);
+
+        let x = child_1.value;
+        let y = child_2.value;
+
+        child_1.value = self.alpha * x + (1.0 - self.alpha) * y;
+        child_2.value = self.alpha * y + (1.0 - self.alpha) * x;
+
+        [child_1, child_2]
     }
 }
 

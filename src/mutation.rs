@@ -1,7 +1,7 @@
 use rand::Rng;
 use rand_distr::{uniform::SampleUniform, Normal, Uniform};
 
-use crate::parameter::BoundedVector;
+use crate::parameter::{BoundedValue, BoundedVector};
 
 pub trait Mutator<T> {
     fn mutate<'a, R: Rng + ?Sized>(&self, rng: &mut R, parameter: &'a mut T) -> &'a mut T;
@@ -63,6 +63,33 @@ impl Mutator<BoundedVector<f64>> for SimpleGaussian<f64> {
             .for_each(|(value, mutation)| {
                 *value = (*value + mutation).clamp(parameter.min_value, parameter.max_value);
             });
+
+        parameter
+    }
+}
+
+pub struct LogNormal<T> {
+    std: T,
+    min_value: T,
+}
+
+impl<T> LogNormal<T> {
+    pub fn new(std: T, min_value: T) -> Self {
+        Self { std, min_value }
+    }
+}
+
+impl Mutator<BoundedValue<f64>> for LogNormal<f64> {
+    fn mutate<'a, R: Rng + ?Sized>(
+        &self,
+        rng: &mut R,
+        parameter: &'a mut BoundedValue<f64>,
+    ) -> &'a mut BoundedValue<f64> {
+        let distribution = Normal::new(0.0, 1.0).unwrap();
+        let min_value = f64::max(self.min_value, parameter.min_value);
+        let max_value = f64::min(f64::INFINITY, parameter.max_value);
+        parameter.value *= f64::exp(self.std * rng.sample(distribution));
+        parameter.value = parameter.value.clamp(min_value, max_value);
 
         parameter
     }
