@@ -1,7 +1,11 @@
+use std::marker::PhantomData;
+
 use rand::Rng;
 use rand_distr::{uniform::SampleUniform, Normal, Uniform};
 
-use crate::parameter::{BoundedValue, BoundedVector};
+use crate::parameter::{
+    BoundedValue, BoundedVector, GaussianStrategyParameter, SelfAdaptiveGaussianVector,
+};
 
 pub trait Mutator<T> {
     fn mutate<'a, R: Rng + ?Sized>(&self, rng: &mut R, parameter: &'a mut T) -> &'a mut T;
@@ -90,6 +94,34 @@ impl Mutator<BoundedValue<f64>> for LogNormal<f64> {
         let max_value = f64::min(f64::INFINITY, parameter.max_value);
         parameter.value *= f64::exp(self.std * rng.sample(distribution));
         parameter.value = parameter.value.clamp(min_value, max_value);
+
+        parameter
+    }
+}
+
+pub struct SelfAdaptiveGaussianVectorMutator<T, SM, S>
+where
+    T: PartialOrd,
+    SM: Mutator<S>,
+    S: GaussianStrategyParameter,
+{
+    strategy_mutator: SM,
+    _markers: PhantomData<(T, S)>,
+}
+
+impl<SM> Mutator<SelfAdaptiveGaussianVector<f64, BoundedValue<f64>>>
+    for SelfAdaptiveGaussianVectorMutator<f64, SM, BoundedValue<f64>>
+where
+    SM: Mutator<BoundedValue<f64>>,
+{
+    fn mutate<'a, R: Rng + ?Sized>(
+        &self,
+        rng: &mut R,
+        parameter: &'a mut SelfAdaptiveGaussianVector<f64, BoundedValue<f64>>,
+    ) -> &'a mut SelfAdaptiveGaussianVector<f64, BoundedValue<f64>> {
+        self.strategy_mutator
+            .mutate(rng, &mut parameter.strategy_parameter);
+        SimpleGaussian::new(parameter.strategy_parameter.value).mutate(rng, &mut parameter.value);
 
         parameter
     }

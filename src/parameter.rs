@@ -24,11 +24,7 @@ where
 
 pub trait GaussianStrategyParameter {}
 
-pub struct UnivariateGaussian<T> {
-    pub std: T,
-}
-
-impl GaussianStrategyParameter for UnivariateGaussian<BoundedValue<f64>> {}
+impl GaussianStrategyParameter for BoundedValue<f64> {}
 
 pub struct SelfAdaptiveGaussianVector<T, S>
 where

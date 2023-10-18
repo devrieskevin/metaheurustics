@@ -1,7 +1,11 @@
+use std::marker::PhantomData;
+
 use rand::Rng;
 use rand_distr::Uniform;
 
-use crate::parameter::{BoundedValue, BoundedVector};
+use crate::parameter::{
+    BoundedValue, BoundedVector, GaussianStrategyParameter, SelfAdaptiveGaussianVector,
+};
 
 pub trait Recombinator<T, const N: usize> {
     fn recombine<R: Rng + ?Sized>(&self, rng: &mut R, parents: &[&T; N]) -> [T; N];
@@ -199,5 +203,55 @@ impl Recombinator<BoundedVector<f64>, 2> for BlendCrossover {
             });
 
         [child_1, child_2]
+    }
+}
+
+pub struct SelfAdaptiveGaussianVectorRecombinator<TR, T, SR, S, const N: usize>
+where
+    TR: Recombinator<BoundedVector<T>, N>,
+    T: PartialOrd,
+    SR: Recombinator<S, N>,
+    S: GaussianStrategyParameter,
+{
+    value_recombinator: TR,
+    strategy_parameter_recombinator: SR,
+    _markers: PhantomData<(T, S)>,
+}
+
+impl<TR, SR> Recombinator<SelfAdaptiveGaussianVector<f64, BoundedValue<f64>>, 2>
+    for SelfAdaptiveGaussianVectorRecombinator<TR, f64, SR, BoundedValue<f64>, 2>
+where
+    TR: Recombinator<BoundedVector<f64>, 2>,
+    SR: Recombinator<BoundedValue<f64>, 2>,
+{
+    fn recombine<R: Rng + ?Sized>(
+        &self,
+        rng: &mut R,
+        parents: &[&SelfAdaptiveGaussianVector<f64, BoundedValue<f64>>; 2],
+    ) -> [SelfAdaptiveGaussianVector<f64, BoundedValue<f64>>; 2] {
+        let [parent_1, parent_2] = parents;
+
+        let parent_values = [&parent_1.value, &parent_2.value];
+        let parent_strategy_parameters =
+            [&parent_1.strategy_parameter, &parent_2.strategy_parameter];
+
+        let recombined_values = self.value_recombinator.recombine(rng, &parent_values);
+        let recombined_strategy_parameters = self
+            .strategy_parameter_recombinator
+            .recombine(rng, &parent_strategy_parameters);
+
+        let children_vector: Vec<_> = recombined_values
+            .into_iter()
+            .zip(recombined_strategy_parameters.into_iter())
+            .map(|(value, strategy_parameter)| SelfAdaptiveGaussianVector {
+                value,
+                strategy_parameter,
+            })
+            .collect();
+
+        match children_vector.try_into() {
+            Ok(children) => children,
+            _ => panic!("Fatal error. Unexpected amount of children created."),
+        }
     }
 }
