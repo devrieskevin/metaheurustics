@@ -3,6 +3,46 @@ use rand_distr::Uniform;
 
 use super::Mutator;
 
+pub struct BitFlip<T>
+where
+    T: PartialOrd,
+{
+    probability: f64,
+    max_bit_count: u32,
+    min_value: T,
+    max_value: T,
+}
+
+impl<T> BitFlip<T>
+where
+    T: PartialOrd,
+{
+    pub fn new(probability: f64, max_bit_count: u32, min_value: T, max_value: T) -> Self {
+        Self {
+            probability: probability.clamp(0.0, 1.0),
+            max_bit_count,
+            min_value,
+            max_value,
+        }
+    }
+}
+
+impl Mutator<i32> for BitFlip<i32> {
+    fn mutate<'a, R: Rng + ?Sized>(&self, rng: &mut R, parameter: &'a mut i32) -> &'a mut i32 {
+        let bitmask = rng
+            .sample_iter(Uniform::new(0.0, 1.0))
+            .zip(0..i32::BITS)
+            .take_while(|(_, i)| *i < self.max_bit_count)
+            .filter(|(prob, _)| *prob <= self.probability)
+            .map(|(_, i)| 1 << i)
+            .fold(0, |acc, val| acc | val);
+
+        *parameter = (*parameter ^ bitmask).clamp(self.min_value, self.max_value);
+
+        parameter
+    }
+}
+
 pub struct RandomResetting<T> {
     probability: f64,
     min_value: T,
