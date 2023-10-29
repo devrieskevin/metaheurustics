@@ -7,6 +7,8 @@ use crate::parameter::{
     BoundedValue, BoundedVector, GaussianStrategyParameter, SelfAdaptiveGaussianVector,
 };
 
+pub mod integer;
+
 pub trait Mutator<T> {
     fn mutate<'a, R: Rng + ?Sized>(&self, rng: &mut R, parameter: &'a mut T) -> &'a mut T;
 }
