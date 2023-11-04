@@ -6,7 +6,6 @@ pub struct OnePoint;
 
 impl Recombinator<i32, 2> for OnePoint {
     fn recombine<R: Rng + ?Sized>(&self, rng: &mut R, parents: &[&i32; 2]) -> [i32; 2] {
-        // Use two's complement to get all bits set
         const ALL_BITS: i32 = !0;
 
         let [&parent_1, &parent_2] = parents;
