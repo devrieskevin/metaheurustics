@@ -7,6 +7,8 @@ use crate::parameter::{
     BoundedValue, BoundedVector, GaussianStrategyParameter, SelfAdaptiveGaussianVector,
 };
 
+pub mod integer;
+
 pub trait Recombinator<T, const N: usize> {
     fn recombine<R: Rng + ?Sized>(&self, rng: &mut R, parents: &[&T; N]) -> [T; N];
 }
