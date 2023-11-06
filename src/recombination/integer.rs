@@ -1,6 +1,7 @@
 use std::num::NonZeroUsize;
 
 use rand::{seq::IteratorRandom, Rng};
+use rand_distr::Bernoulli;
 
 use super::Recombinator;
 
@@ -46,6 +47,26 @@ impl Recombinator<i32, 2> for NPoint {
             let one_bits = right_bound - left_bound;
             acc | (!(ALL_BITS << one_bits) << left_bound)
         });
+
+        let child_1 = (parent_1 & mask) | (parent_2 & !mask);
+        let child_2 = (parent_2 & mask) | (parent_1 & !mask);
+
+        [child_1, child_2]
+    }
+}
+
+pub struct Uniform;
+
+impl Recombinator<i32, 2> for Uniform {
+    fn recombine<R: Rng + ?Sized>(&self, rng: &mut R, parents: &[&i32; 2]) -> [i32; 2] {
+        let [&parent_1, &parent_2] = parents;
+
+        let distribution = Bernoulli::new(0.5).unwrap();
+
+        let mask = (0..i32::BITS)
+            .zip(rng.sample_iter(distribution))
+            .filter(|(_, sample)| *sample)
+            .fold(0, |acc, (bit, _)| acc | 1 << bit);
 
         let child_1 = (parent_1 & mask) | (parent_2 & !mask);
         let child_2 = (parent_2 & mask) | (parent_1 & !mask);
