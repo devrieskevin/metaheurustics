@@ -1,4 +1,5 @@
-use rand::{distributions::Slice, Rng};
+use rand::Rng;
+use rand_distr::Bernoulli;
 use rand_distr::Uniform;
 
 use super::Mutator;
@@ -27,22 +28,6 @@ where
     }
 }
 
-impl Mutator<i32> for BitFlip<i32> {
-    fn mutate<'a, R: Rng + ?Sized>(&self, rng: &mut R, parameter: &'a mut i32) -> &'a mut i32 {
-        let bitmask = rng
-            .sample_iter(Uniform::new(0.0, 1.0))
-            .zip(0..i32::BITS)
-            .take_while(|(_, i)| *i < self.max_bit_count)
-            .filter(|(prob, _)| *prob <= self.probability)
-            .map(|(_, i)| 1 << i)
-            .fold(0, |acc, val| acc | val);
-
-        *parameter = (*parameter ^ bitmask).clamp(self.min_value, self.max_value);
-
-        parameter
-    }
-}
-
 pub struct RandomResetting<T> {
     probability: f64,
     min_value: T,
@@ -59,17 +44,6 @@ impl<T> RandomResetting<T> {
     }
 }
 
-impl Mutator<i32> for RandomResetting<i32> {
-    fn mutate<'a, R: Rng + ?Sized>(&self, rng: &mut R, parameter: &'a mut i32) -> &'a mut i32 {
-        let random_value = rng.sample(Uniform::new(0.0, 1.0));
-        if random_value <= self.probability {
-            let distribution = Uniform::new_inclusive(self.min_value, self.max_value);
-            *parameter = rng.sample(distribution);
-        }
-        parameter
-    }
-}
-
 pub struct SimpleCreep<T> {
     probability: f64,
     min_value: T,
@@ -77,8 +51,8 @@ pub struct SimpleCreep<T> {
     step_size: T,
 }
 
-impl SimpleCreep<i32> {
-    pub fn new(probability: f64, min_value: i32, max_value: i32, step_size: i32) -> Self {
+impl<T> SimpleCreep<T> {
+    pub fn new(probability: f64, min_value: T, max_value: T, step_size: T) -> Self {
         Self {
             probability,
             min_value,
@@ -88,18 +62,55 @@ impl SimpleCreep<i32> {
     }
 }
 
-impl Mutator<i32> for SimpleCreep<i32> {
-    fn mutate<'a, R: Rng + ?Sized>(&self, rng: &mut R, parameter: &'a mut i32) -> &'a mut i32 {
-        let step_choices = [-self.step_size, self.step_size];
-        let random_value = rng.sample(Uniform::new(0.0, 1.0));
-        if random_value <= self.probability {
-            let distribution = Slice::new(&step_choices).unwrap();
-            let random_value = rng.sample(distribution);
-            *parameter = (*parameter + random_value).clamp(self.min_value, self.max_value);
-        }
-        parameter
-    }
+macro_rules! int_mutator_impl {
+    ($($Int:ty)+) => {
+        $(
+            impl Mutator<$Int> for BitFlip<$Int> {
+                fn mutate<'a, R: Rng + ?Sized>(&self, rng: &mut R, parameter: &'a mut $Int) -> &'a mut $Int {
+                    let bitmask = rng
+                        .sample_iter(Uniform::new(0.0, 1.0))
+                        .zip(0..<$Int>::BITS)
+                        .take_while(|(_, i)| *i < self.max_bit_count)
+                        .filter(|(prob, _)| *prob <= self.probability)
+                        .map(|(_, i)| 1 << i)
+                        .fold(0, |acc, val| acc | val);
+
+                    *parameter = (*parameter ^ bitmask).clamp(self.min_value, self.max_value);
+
+                    parameter
+                }
+            }
+
+            impl Mutator<$Int> for RandomResetting<$Int> {
+                fn mutate<'a, R: Rng + ?Sized>(&self, rng: &mut R, parameter: &'a mut $Int) -> &'a mut $Int {
+                    let random_value = rng.sample(Uniform::new(0.0, 1.0));
+                    if random_value <= self.probability {
+                        let distribution = Uniform::new_inclusive(self.min_value, self.max_value);
+                        *parameter = rng.sample(distribution);
+                    }
+                    parameter
+                }
+            }
+
+            impl Mutator<$Int> for SimpleCreep<$Int> {
+                fn mutate<'a, R: Rng + ?Sized>(&self, rng: &mut R, parameter: &'a mut $Int) -> &'a mut $Int {
+                    if rng.sample(Bernoulli::new(self.probability).unwrap()) {
+                        let distribution = Bernoulli::new(0.5).unwrap();
+                        let parameter_raw = if rng.sample(distribution) {
+                            parameter.checked_add(self.step_size).unwrap_or(self.max_value)
+                        } else {
+                            parameter.checked_sub(self.step_size).unwrap_or(self.min_value)
+                        };
+                        *parameter = parameter_raw.clamp(self.min_value, self.max_value);
+                    }
+                    parameter
+                }
+            }
+        )+
+    };
 }
+
+int_mutator_impl!(u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize);
 
 #[cfg(test)]
 mod tests {
