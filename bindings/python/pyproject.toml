@@ -1,0 +1,35 @@
+[project]
+name = "metaheurustics"
+version = "0.1.0"
+description = "Python bindings for the Metaheurustics crate"
+authors = [ {name = "Kevin de Vries", email = "devrieskevin@live.nl"} ]
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+
+[build-system]
+requires = ["maturin>=1.3,<2.0"]
+build-backend = "maturin"
+
+[tool.poetry]
+name = "metaheurustics"
+version = "0.1.0"
+description = "Python bindings for the Metaheurustics crate"
+authors = ["Kevin de Vries <devrieskevin@live.nl>"]
+readme = "README.md"
+packages = [
+    {include = "py_src/metaheurustics"},
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.group.dev.dependencies]
+maturin = "^1.3.2"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+python-source = "py_src"
