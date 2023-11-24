@@ -2,7 +2,7 @@ use metaheurustics::{selection::survivor::{ReplaceWorstSelector, SurvivorSelecto
 use pyo3::{pyclass, pymethods};
 use rand::Rng;
 
-#[pyclass]
+#[pyclass(name = "ReplaceWorst")]
 pub struct PyReplaceWorst {
     selector: ReplaceWorstSelector,
 }

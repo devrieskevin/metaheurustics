@@ -1,26 +1,16 @@
-use pyo3::{prelude::*, types::PyType};
+use pyo3::prelude::*;
 
 mod composable;
 mod mutation;
 mod recombination;
 mod selection;
 
-/// Formats the sum of two numbers as string.
-#[pyfunction]
-fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
-    Ok((a + b).to_string())
-}
-
-#[pyfunction]
-fn type_name(py_type: &PyType) -> PyResult<String> {
-    let name = py_type.name()?;
-    Ok(format!("Type: {}", name))
-}
-
 /// A Python module implemented in Rust.
 #[pymodule]
 fn metaheurustics(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
-    m.add_function(wrap_pyfunction!(type_name, m)?)?;
+    m.add_class::<mutation::PyBitFlip>()?;
+    m.add_class::<recombination::PyOnePoint>()?;
+    m.add_class::<selection::parent::PyLinearRanking>()?;
+    m.add_class::<selection::survivor::PyReplaceWorst>()?;
     Ok(())
 }

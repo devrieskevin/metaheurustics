@@ -1,2 +1,6 @@
-from .metaheurustics import sum_as_string
-from .metaheurustics import type_name
+from .metaheurustics import (
+    BitFlip,
+    ReplaceWorst,
+    LinearRanking,
+    OnePoint
+)

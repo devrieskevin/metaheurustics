@@ -2,8 +2,8 @@ use metaheurustics::recombination::{integer::OnePoint, Recombinator};
 use pyo3::{pyclass, pymethods};
 use rand::Rng;
 
-#[pyclass]
-struct PyOnePoint {
+#[pyclass(name = "OnePoint")]
+pub struct PyOnePoint {
     recombinator: OnePoint,
 }
 

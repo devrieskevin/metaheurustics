@@ -10,13 +10,13 @@ if __name__ == "__main__":
         "parameters": {
             "value": {
                 "type": int,
-                "mutation": "bit-flip",
-                "recombination": "one-point",
+                "mutation": mh.BitFlip(0.1, 10, 0, 100),
+                "recombination": mh.OnePoint(),
             }
         },
-        "parent_selection": "linear_ranking",
-        "survivor_selection": "replace_worst",
+        "parent_selection": mh.LinearRanking(1.5),
+        "survivor_selection": mh.ReplaceWorst(0.5),
         "problem": problem,
     }
 
-    print(mh.type_name(float))
+    print(type([]))
