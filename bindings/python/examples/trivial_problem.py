@@ -15,7 +15,7 @@ if __name__ == "__main__":
             }
         },
         "parent_selection": "linear_ranking",
-        "survivor_selection": "round_robin_tournament",
+        "survivor_selection": "replace_worst",
         "problem": problem,
     }
 

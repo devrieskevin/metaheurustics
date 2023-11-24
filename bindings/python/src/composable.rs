@@ -4,7 +4,7 @@ use pyo3::FromPyObject;
 
 #[derive(FromPyObject)]
 pub enum PyInputParameter {
-    Int(i64),
+    Int(i32),
 }
 
 pub struct ComposableIndividual {

@@ -1,6 +1,9 @@
 use pyo3::{prelude::*, types::PyType};
 
 mod composable;
+mod mutation;
+mod recombination;
+mod selection;
 
 /// Formats the sum of two numbers as string.
 #[pyfunction]
