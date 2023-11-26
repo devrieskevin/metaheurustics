@@ -2,7 +2,7 @@ use metaheurustics::mutation::{integer::BitFlip, Mutator};
 use pyo3::{pyclass, pymethods};
 use rand::Rng;
 
-#[pyclass(name = "BitFlip")]
+#[pyclass(module = "metaheurustics", name = "BitFlip")]
 pub struct PyBitFlip {
     mutator: BitFlip<i32>,
 }

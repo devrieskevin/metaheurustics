@@ -4,7 +4,7 @@ use metaheurustics::{selection::parent::{LinearRanking, ParentSelector}, individ
 use pyo3::{pyclass, pymethods};
 use rand::Rng;
 
-#[pyclass(name = "LinearRanking")]
+#[pyclass(module = "metaheurustics", name = "LinearRanking")]
 pub struct PyLinearRanking {
     selector: LinearRanking,
 }
