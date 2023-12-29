@@ -1,4 +1,7 @@
-use metaheurustics::{selection::survivor::{ReplaceWorstSelector, SurvivorSelector}, individual::Individual};
+use metaheurustics::{
+    individual::Individual,
+    selection::survivor::{ReplaceWorstSelector, SurvivorSelector},
+};
 use pyo3::{pyclass, pymethods};
 use rand::Rng;
 
@@ -18,12 +21,7 @@ impl PyReplaceWorst {
 }
 
 impl SurvivorSelector for PyReplaceWorst {
-    fn select<'a, R, I, F>(
-        &self,
-        rng: &mut R,
-        individuals: &mut [I],
-        offspring: Vec<I>,
-    )
+    fn select<'a, R, I, F>(&self, rng: &mut R, individuals: &mut [I], offspring: Vec<I>)
     where
         R: Rng + ?Sized,
         I: Individual<F>,

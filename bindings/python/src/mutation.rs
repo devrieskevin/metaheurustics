@@ -15,7 +15,6 @@ impl PyBitFlip {
             mutator: BitFlip::new(probability, max_bit_count, min_value, max_value),
         }
     }
-
 }
 
 impl Mutator<i32> for PyBitFlip {

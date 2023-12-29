@@ -1,5 +1,5 @@
 use metaheurustics::individual::Individual;
-use pyo3::{FromPyObject, PyObject, pyclass, pymethods, Python, PyClass, IntoPy};
+use pyo3::{pyclass, pymethods, FromPyObject, IntoPy, PyClass, PyObject, Python};
 
 #[derive(FromPyObject)]
 pub enum PyInputParameter {
@@ -15,9 +15,7 @@ pub struct PyIndividual {
 impl PyIndividual {
     #[new]
     pub fn new(individual: PyObject) -> Self {
-        Self {
-            individual,
-        }
+        Self { individual }
     }
 }
 

@@ -1,6 +1,9 @@
 use std::iter::FromIterator;
 
-use metaheurustics::{selection::parent::{LinearRanking, ParentSelector}, individual::Individual};
+use metaheurustics::{
+    individual::Individual,
+    selection::parent::{LinearRanking, ParentSelector},
+};
 use pyo3::{pyclass, pymethods};
 use rand::Rng;
 
@@ -20,12 +23,7 @@ impl PyLinearRanking {
 }
 
 impl ParentSelector<f64> for PyLinearRanking {
-    fn select<'a, R, I, C>(
-        &self,
-        rng: &mut R,
-        individuals: &'a [I],
-        number_children: usize,
-    ) -> C
+    fn select<'a, R, I, C>(&self, rng: &mut R, individuals: &'a [I], number_children: usize) -> C
     where
         R: Rng + ?Sized,
         I: Individual<f64>,
