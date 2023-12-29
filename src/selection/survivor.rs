@@ -93,7 +93,7 @@ impl SurvivorSelector for ReplaceWorstSelector {
 
         population
             .iter_mut()
-            .zip(offspring.into_iter())
+            .zip(offspring)
             .take(replacement_count)
             .for_each(|(value, offspring)| {
                 *value = offspring;

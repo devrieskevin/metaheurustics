@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
 
-mod composable;
+mod individual;
 mod mutation;
 mod recombination;
 mod selection;
