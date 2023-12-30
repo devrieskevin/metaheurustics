@@ -19,3 +19,7 @@ class LinearRanking:
 class OnePoint:
     def __init__(self) -> None:
         pass
+
+class SmallRng:
+    def __init__(self, seed: int|None) -> None:
+        pass
