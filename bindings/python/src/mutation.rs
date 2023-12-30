@@ -1,6 +1,32 @@
 use metaheurustics::mutation::{integer::BitFlip, Mutator};
-use pyo3::{pyclass, pymethods};
-use rand::Rng;
+use pyo3::{pyclass, pymethods, PyCell, PyObject, Python};
+
+use crate::{individual::PyIndividual, rand::PySmallRng};
+
+#[pyclass(module = "metaheurustics", name = "IndividualMutator")]
+pub struct PyIndividualMutator {
+    individual_mutator: PyObject,
+}
+
+#[pymethods]
+impl PyIndividualMutator {
+    #[new]
+    pub fn new(individual_mutator: PyObject) -> Self {
+        Self { individual_mutator }
+    }
+
+    pub fn mutate<'py>(
+        &self,
+        py: Python<'py>,
+        rng: &'py PyCell<PySmallRng>,
+        parameter: &'py PyCell<PyIndividual>,
+    ) -> &'py PyCell<PyIndividual> {
+        self.individual_mutator
+            .call_method(py, "mutate", (rng, parameter), None)
+            .expect("Failed to call mutate");
+        parameter
+    }
+}
 
 #[pyclass(module = "metaheurustics", name = "BitFlip")]
 pub struct PyBitFlip {
@@ -15,10 +41,10 @@ impl PyBitFlip {
             mutator: BitFlip::new(probability, max_bit_count, min_value, max_value),
         }
     }
-}
 
-impl Mutator<i32> for PyBitFlip {
-    fn mutate<'a, R: Rng + ?Sized>(&self, rng: &mut R, parameter: &'a mut i32) -> &'a mut i32 {
-        self.mutator.mutate(rng, parameter)
+    pub fn mutate(&self, rng: &mut PySmallRng, parameter: i32) -> i32 {
+        let mut parameter = parameter;
+        self.mutator.mutate(rng, &mut parameter);
+        parameter
     }
 }

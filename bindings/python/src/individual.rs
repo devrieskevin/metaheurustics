@@ -7,6 +7,7 @@ pub enum PyInputParameter {
 }
 
 #[pyclass]
+#[derive(Clone)]
 pub struct PyIndividual {
     individual: PyObject,
 }
