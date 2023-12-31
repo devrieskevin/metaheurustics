@@ -28,18 +28,18 @@ class MyIndividualRecombinator:
         return [MyIndividual(child) for child in children]
 
 if __name__ == "__main__":
-    a = MyIndividual(10)
-    b = MyIndividual(20)
+    a = mh.Individual(MyIndividual(10))
+    b = mh.Individual(MyIndividual(20))
     rng = mh.SmallRng(5)
 
-    mutator = MyIndividualMutator()
-    recombinator = MyIndividualRecombinator()
+    mutator = mh.IndividualMutator(MyIndividualMutator())
+    recombinator = mh.IndividualRecombinator(MyIndividualRecombinator())
 
     children = recombinator.recombine(rng, [a, b])
 
-    print(children[0].value, children[1].value)
+    print(children[0].individual.value, children[1].individual.value)
 
     for child in children:
         mutator.mutate(rng, child)
 
-    print(children[0].value, children[1].value)
+    print(children[0].individual.value, children[1].individual.value)

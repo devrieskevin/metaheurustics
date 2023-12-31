@@ -23,12 +23,20 @@ impl PyIndividualRecombinator {
         rng: &'py PyCell<PySmallRng>,
         parents: [&'py PyCell<PyIndividual>; 2],
     ) -> [PyIndividual; 2] {
+        let internal_individuals = parents
+            .iter()
+            .map(|parent| parent.borrow().individual().clone_ref(py))
+            .collect::<Vec<_>>();
+
         let result = self
             .individual_recombinator
-            .call_method1(py, "recombine", (rng, parents))
+            .call_method1(py, "recombine", (rng, internal_individuals))
             .expect("Failed to call recombine")
-            .extract::<Vec<_>>(py)
+            .extract::<Vec<PyObject>>(py)
             .expect("Failed to extract recombine result")
+            .iter()
+            .map(|child| PyIndividual::new(child.clone_ref(py)))
+            .collect::<Vec<PyIndividual>>()
             .try_into();
 
         match result {

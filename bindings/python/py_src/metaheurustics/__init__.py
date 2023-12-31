@@ -4,4 +4,7 @@ from .metaheurustics import (
     LinearRanking,
     OnePoint,
     SmallRng,
+    Individual,
+    IndividualMutator,
+    IndividualRecombinator,
 )

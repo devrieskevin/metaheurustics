@@ -21,8 +21,10 @@ impl PyIndividualMutator {
         rng: &'py PyCell<PySmallRng>,
         parameter: &'py PyCell<PyIndividual>,
     ) -> &'py PyCell<PyIndividual> {
+        let internal_individual = parameter.borrow().individual().clone_ref(py);
+
         self.individual_mutator
-            .call_method(py, "mutate", (rng, parameter), None)
+            .call_method1(py, "mutate", (rng, internal_individual))
             .expect("Failed to call mutate");
         parameter
     }

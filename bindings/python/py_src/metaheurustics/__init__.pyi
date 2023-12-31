@@ -1,3 +1,6 @@
+from typing import List
+
+
 class BitFlip:
     def __init__(
         self,
@@ -22,4 +25,26 @@ class OnePoint:
 
 class SmallRng:
     def __init__(self, seed: int|None) -> None:
+        pass
+
+class Individual:
+    def __init__(self, individual: object) -> None:
+        pass
+
+class IndividualMutator:
+    def __init__(self, mutator: object) -> None:
+        pass
+
+    def mutate(self, rng: SmallRng, individual: object) -> object:
+        pass
+
+class IndividualRecombinator:
+    def __init__(self, recombinator: object) -> None:
+        pass
+
+    def recombine(
+        self,
+        rng: SmallRng,
+        parents: List[object]
+    ) -> object:
         pass

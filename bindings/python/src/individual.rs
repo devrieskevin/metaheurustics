@@ -6,7 +6,7 @@ pub enum PyInputParameter {
     Int(i32),
 }
 
-#[pyclass]
+#[pyclass(name = "Individual", module = "metaheurustics")]
 #[derive(Clone)]
 pub struct PyIndividual {
     individual: PyObject,
@@ -17,6 +17,11 @@ impl PyIndividual {
     #[new]
     pub fn new(individual: PyObject) -> Self {
         Self { individual }
+    }
+
+    #[getter]
+    pub fn individual(&self) -> &PyObject {
+        &self.individual
     }
 }
 

@@ -14,5 +14,8 @@ fn metaheurustics(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<selection::parent::PyLinearRanking>()?;
     m.add_class::<selection::survivor::PyReplaceWorst>()?;
     m.add_class::<rand::PySmallRng>()?;
+    m.add_class::<individual::PyIndividual>()?;
+    m.add_class::<mutation::PyIndividualMutator>()?;
+    m.add_class::<recombination::PyIndividualRecombinator>()?;
     Ok(())
 }
