@@ -1,5 +1,7 @@
 use metaheurustics::individual::Individual;
-use pyo3::{pyclass, pymethods, IntoPy, PyClass, PyObject, Python};
+use pyo3::{pyclass, pymethods, PyObject, Python};
+
+use crate::fitness::PyFitness;
 
 #[pyclass(name = "Individual", module = "metaheurustics")]
 #[derive(Clone)]
@@ -20,11 +22,8 @@ impl PyIndividual {
     }
 }
 
-impl<F> Individual<F> for PyIndividual
-where
-    F: PartialOrd + Clone + PyClass + IntoPy<PyObject>,
-{
-    fn fitness(&self) -> F {
+impl Individual<PyFitness> for PyIndividual {
+    fn fitness(&self) -> PyFitness {
         Python::with_gil(|py| {
             self.individual
                 .as_ref(py)
@@ -35,12 +34,11 @@ where
         })
     }
 
-    fn set_fitness(&mut self, fitness: F) -> &mut Self {
+    fn set_fitness(&mut self, fitness: PyFitness) -> &mut Self {
         Python::with_gil(|py| {
-            let py_fitness = fitness.clone();
             let py_individual = self.individual.as_ref(py);
             py_individual
-                .call_method("set_fitness", (py_fitness,), None)
+                .call_method("set_fitness", (fitness,), None)
                 .unwrap();
         });
 
