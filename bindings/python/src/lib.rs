@@ -2,6 +2,7 @@ use pyo3::prelude::*;
 
 mod individual;
 mod mutation;
+mod output;
 mod rand;
 mod recombination;
 mod selection;

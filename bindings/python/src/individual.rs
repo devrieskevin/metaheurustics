@@ -1,10 +1,5 @@
 use metaheurustics::individual::Individual;
-use pyo3::{pyclass, pymethods, FromPyObject, IntoPy, PyClass, PyObject, Python};
-
-#[derive(FromPyObject)]
-pub enum PyInputParameter {
-    Int(i32),
-}
+use pyo3::{pyclass, pymethods, IntoPy, PyClass, PyObject, Python};
 
 #[pyclass(name = "Individual", module = "metaheurustics")]
 #[derive(Clone)]
