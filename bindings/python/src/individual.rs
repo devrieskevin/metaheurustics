@@ -4,7 +4,7 @@ use pyo3::{pyclass, pymethods, PyObject, Python};
 use crate::fitness::PyFitness;
 
 #[pyclass(name = "Individual", module = "metaheurustics")]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PyIndividual {
     individual: PyObject,
 }

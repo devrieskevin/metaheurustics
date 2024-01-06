@@ -1,4 +1,5 @@
 import metaheurustics as mh
+import random
 
 from typing import List
 
@@ -11,7 +12,7 @@ class MyIndividualMutator:
     value_mutator: mh.BitFlip
 
     def __init__(self):
-        self.value_mutator = mh.BitFlip(.5, 10, 0, 2**31 - 1)
+        self.value_mutator = mh.BitFlip(.5, 10, 0, 100)
 
     def mutate(self, rng: mh.SmallRng, individual: MyIndividual) -> MyIndividual:
         individual.value = self.value_mutator.mutate(rng, individual.value)
@@ -26,6 +27,24 @@ class MyIndividualRecombinator:
     def recombine(self, rng: mh.SmallRng, parents: List[MyIndividual]) -> List[MyIndividual]:
         children = self.value_recombinator.recombine(rng,[parent.value for parent in parents])
         return [MyIndividual(child) for child in children]
+
+class Problem:
+    mutator: MyIndividualMutator
+    recombinator: MyIndividualRecombinator
+
+    def __init__(
+            self,
+            mutator: MyIndividualMutator,
+            recombinator: MyIndividualRecombinator,
+    ):
+        self.mutator = mutator
+        self.recombinator = recombinator
+
+def evaluate(individual: MyIndividual) -> float:
+    return -(individual.value - 50.0)**2
+
+def initialize_population(size: int) -> List[MyIndividual]:
+    return [MyIndividual(random.randint(0, 100)) for _ in range(size)]
 
 if __name__ == "__main__":
     a = mh.Individual(MyIndividual(10))
