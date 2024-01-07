@@ -38,6 +38,7 @@ class IndividualProtocol(Protocol):
             age (int): The age of the individual.
         """
 
+
 class MutatorProtocol(Protocol):
     """A protocol describing the methods that a mutator must implement.
 
@@ -56,6 +57,7 @@ class MutatorProtocol(Protocol):
             IndividualProtocol: The mutated individual.
         """
 
+
 class RecombinatorProtocol(Protocol):
     """A protocol describing the methods that a recombinator must implement.
 
@@ -66,7 +68,7 @@ class RecombinatorProtocol(Protocol):
     def recombine(
         self,
         rng: SmallRng,
-        parents: List[IndividualProtocol]
+        parents: List[IndividualProtocol],
     ) -> List[IndividualProtocol]:
         """Recombines a list of individuals.
 

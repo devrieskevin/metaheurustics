@@ -1,7 +1,8 @@
-import metaheurustics as mh
 import random
-
 from typing import List
+
+import metaheurustics as mh
+
 
 class MyIndividual:
     fitness: float
@@ -22,19 +23,22 @@ class MyIndividual:
     def set_age(self, age: int) -> None:
         self.age = age
 
+
 class MyIndividualMutator:
     value_mutator: mh.BitFlip
 
     def __init__(self):
-        self.value_mutator = mh.BitFlip(.5, 10, 0, 100)
+        self.value_mutator = mh.BitFlip(0.5, 10, 0, 100)
 
     def mutate(self, rng: mh.SmallRng, individual: MyIndividual) -> MyIndividual:
         individual.value = self.value_mutator.mutate(rng, individual.value)
         return individual
 
+
 class NoOpIndividualMutator:
     def mutate(self, _rng: mh.SmallRng, individual: MyIndividual) -> MyIndividual:
         return individual
+
 
 class MyIndividualRecombinator:
     value_recombinator: mh.OnePoint
@@ -42,19 +46,34 @@ class MyIndividualRecombinator:
     def __init__(self):
         self.value_recombinator = mh.OnePoint()
 
-    def recombine(self, rng: mh.SmallRng, parents: List[MyIndividual]) -> List[MyIndividual]:
-        children = self.value_recombinator.recombine(rng,[parent.value for parent in parents])
+    def recombine(
+        self,
+        rng: mh.SmallRng,
+        parents: List[MyIndividual],
+    ) -> List[MyIndividual]:
+        children = self.value_recombinator.recombine(
+            rng,
+            [parent.value for parent in parents],
+        )
         return [MyIndividual(child) for child in children]
 
+
 class NoOpIndividualRecombinator:
-    def recombine(self, _rng: mh.SmallRng, parents: List[MyIndividual]) -> List[MyIndividual]:
+    def recombine(
+        self,
+        _rng: mh.SmallRng,
+        parents: List[MyIndividual],
+    ) -> List[MyIndividual]:
         return parents
 
+
 def evaluate(individual: MyIndividual) -> float:
-    return -(individual.value - 50.0)**2
+    return -((individual.value - 50.0) ** 2)
+
 
 def initialize_population(_rng: mh.SmallRng, size: int) -> List[MyIndividual]:
     return [MyIndividual(random.randint(0, 100)) for _ in range(size)]
+
 
 if __name__ == "__main__":
     my_rng = mh.SmallRng(None)
@@ -63,9 +82,9 @@ if __name__ == "__main__":
         mh.LinearRanking(1.5),
         MyIndividualRecombinator(),
         MyIndividualMutator(),
-        mh.ReplaceWorst(.1),
+        mh.ReplaceWorst(0.1),
         evaluate,
-        initialize_population
+        initialize_population,
     )
     results = solver.solve(100, 100)
 

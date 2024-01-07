@@ -1,7 +1,10 @@
 from typing import Callable, List
 
-from metaheurustics.typing import IndividualProtocol, MutatorProtocol, RecombinatorProtocol
-
+from metaheurustics.typing import (
+    IndividualProtocol,
+    MutatorProtocol,
+    RecombinatorProtocol,
+)
 
 class BitFlip:
     def __init__(
@@ -26,7 +29,7 @@ class OnePoint:
         pass
 
 class SmallRng:
-    def __init__(self, seed: int|None) -> None:
+    def __init__(self, seed: int | None) -> None:
         pass
 
 class Individual:
@@ -36,14 +39,16 @@ class Individual:
 class IndividualMutator:
     def __init__(self, mutator: MutatorProtocol) -> None:
         pass
-
-    def mutate(self, rng: SmallRng, individual: IndividualProtocol) -> IndividualProtocol:
+    def mutate(
+        self,
+        rng: SmallRng,
+        individual: IndividualProtocol,
+    ) -> IndividualProtocol:
         pass
 
 class IndividualRecombinator:
     def __init__(self, recombinator: RecombinatorProtocol) -> None:
         pass
-
     def recombine(
         self,
         rng: SmallRng,
@@ -63,6 +68,5 @@ class Solver:
         initializer: Callable[[SmallRng, int], IndividualProtocol],
     ) -> None:
         pass
-
     def solve(self, population_size: int, number_iterations: int) -> List[object]:
         pass
