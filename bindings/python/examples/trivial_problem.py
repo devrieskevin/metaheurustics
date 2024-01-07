@@ -32,6 +32,10 @@ class MyIndividualMutator:
         individual.value = self.value_mutator.mutate(rng, individual.value)
         return individual
 
+class NoOpIndividualMutator:
+    def mutate(self, _rng: mh.SmallRng, individual: MyIndividual) -> MyIndividual:
+        return individual
+
 class MyIndividualRecombinator:
     value_recombinator: mh.OnePoint
 
@@ -41,6 +45,10 @@ class MyIndividualRecombinator:
     def recombine(self, rng: mh.SmallRng, parents: List[MyIndividual]) -> List[MyIndividual]:
         children = self.value_recombinator.recombine(rng,[parent.value for parent in parents])
         return [MyIndividual(child) for child in children]
+
+class NoOpIndividualRecombinator:
+    def recombine(self, _rng: mh.SmallRng, parents: List[MyIndividual]) -> List[MyIndividual]:
+        return parents
 
 def evaluate(individual: MyIndividual) -> float:
     return -(individual.value - 50.0)**2

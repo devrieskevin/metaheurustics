@@ -1,5 +1,7 @@
 from typing import Callable, List
 
+from metaheurustics.typing import IndividualProtocol, MutatorProtocol, RecombinatorProtocol
+
 
 class BitFlip:
     def __init__(
@@ -7,7 +9,7 @@ class BitFlip:
         probability: float,
         max_bit_count: int,
         min_value: int,
-        max_value: int
+        max_value: int,
     ) -> None:
         pass
 
@@ -28,25 +30,25 @@ class SmallRng:
         pass
 
 class Individual:
-    def __init__(self, individual: object) -> None:
+    def __init__(self, individual: IndividualProtocol) -> None:
         pass
 
 class IndividualMutator:
-    def __init__(self, mutator: object) -> None:
+    def __init__(self, mutator: MutatorProtocol) -> None:
         pass
 
-    def mutate(self, rng: SmallRng, individual: object) -> object:
+    def mutate(self, rng: SmallRng, individual: IndividualProtocol) -> IndividualProtocol:
         pass
 
 class IndividualRecombinator:
-    def __init__(self, recombinator: object) -> None:
+    def __init__(self, recombinator: RecombinatorProtocol) -> None:
         pass
 
     def recombine(
         self,
         rng: SmallRng,
-        parents: List[object]
-    ) -> object:
+        parents: List[IndividualProtocol],
+    ) -> List[IndividualProtocol]:
         pass
 
 class Solver:
@@ -54,11 +56,11 @@ class Solver:
         self,
         rng: SmallRng,
         parent_selector: LinearRanking,
-        recombinator: object,
-        mutator: object,
+        recombinator: RecombinatorProtocol,
+        mutator: MutatorProtocol,
         survivor_selector: ReplaceWorst,
-        evaluator: Callable[[object], object],
-        initializer: Callable[[SmallRng, int], object]
+        evaluator: Callable[[IndividualProtocol], object],
+        initializer: Callable[[SmallRng, int], IndividualProtocol],
     ) -> None:
         pass
 
