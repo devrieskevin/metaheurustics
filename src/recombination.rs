@@ -244,7 +244,7 @@ where
 
         let children_vector: Vec<_> = recombined_values
             .into_iter()
-            .zip(recombined_strategy_parameters.into_iter())
+            .zip(recombined_strategy_parameters)
             .map(|(value, strategy_parameter)| SelfAdaptiveGaussianVector {
                 value,
                 strategy_parameter,
