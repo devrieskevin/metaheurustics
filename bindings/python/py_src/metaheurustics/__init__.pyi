@@ -1,4 +1,4 @@
-from typing import List
+from typing import Callable, List
 
 
 class BitFlip:
@@ -47,4 +47,20 @@ class IndividualRecombinator:
         rng: SmallRng,
         parents: List[object]
     ) -> object:
+        pass
+
+class Solver:
+    def __init__(
+        self,
+        rng: SmallRng,
+        parent_selector: LinearRanking,
+        recombinator: object,
+        mutator: object,
+        survivor_selector: ReplaceWorst,
+        evaluator: Callable[[object], object],
+        initializer: Callable[[SmallRng, int], object]
+    ) -> None:
+        pass
+
+    def solve(self, population_size: int, number_iterations: int) -> List[object]:
         pass

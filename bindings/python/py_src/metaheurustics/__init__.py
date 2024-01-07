@@ -7,4 +7,5 @@ from .metaheurustics import (
     Individual,
     IndividualMutator,
     IndividualRecombinator,
+    Solver,
 )

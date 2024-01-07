@@ -4,9 +4,23 @@ import random
 from typing import List
 
 class MyIndividual:
+    fitness: float
+    age: int
+
     def __init__(self, value: int):
         self.value = value
 
+    def get_fitness(self) -> float:
+        return self.fitness
+
+    def set_fitness(self, fitness: float) -> None:
+        self.fitness = fitness
+
+    def get_age(self) -> int:
+        return self.age
+
+    def set_age(self, age: int) -> None:
+        self.age = age
 
 class MyIndividualMutator:
     value_mutator: mh.BitFlip
@@ -28,37 +42,23 @@ class MyIndividualRecombinator:
         children = self.value_recombinator.recombine(rng,[parent.value for parent in parents])
         return [MyIndividual(child) for child in children]
 
-class Problem:
-    mutator: MyIndividualMutator
-    recombinator: MyIndividualRecombinator
-
-    def __init__(
-            self,
-            mutator: MyIndividualMutator,
-            recombinator: MyIndividualRecombinator,
-    ):
-        self.mutator = mutator
-        self.recombinator = recombinator
-
 def evaluate(individual: MyIndividual) -> float:
     return -(individual.value - 50.0)**2
 
-def initialize_population(size: int) -> List[MyIndividual]:
+def initialize_population(_rng: mh.SmallRng, size: int) -> List[MyIndividual]:
     return [MyIndividual(random.randint(0, 100)) for _ in range(size)]
 
 if __name__ == "__main__":
-    a = mh.Individual(MyIndividual(10))
-    b = mh.Individual(MyIndividual(20))
-    rng = mh.SmallRng(5)
+    my_rng = mh.SmallRng(None)
+    solver = mh.Solver(
+        my_rng,
+        mh.LinearRanking(1.5),
+        MyIndividualRecombinator(),
+        MyIndividualMutator(),
+        mh.ReplaceWorst(.1),
+        evaluate,
+        initialize_population
+    )
+    results = solver.solve(100, 100)
 
-    mutator = mh.IndividualMutator(MyIndividualMutator())
-    recombinator = mh.IndividualRecombinator(MyIndividualRecombinator())
-
-    children = recombinator.recombine(rng, [a, b])
-
-    print(children[0].individual.value, children[1].individual.value)
-
-    for child in children:
-        mutator.mutate(rng, child)
-
-    print(children[0].individual.value, children[1].individual.value)
+    print(results[0].individual.value)

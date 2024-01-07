@@ -21,8 +21,8 @@ use crate::{
 pub struct PySolver {
     rng: PyObject,
     parent_selector: PyObject,
-    mutator: PyIndividualMutator,
     recombinator: PyIndividualRecombinator,
+    mutator: PyIndividualMutator,
     survivor_selector: PyObject,
     evaluator: Py<PyFunction>,
     initializer: Py<PyFunction>,
@@ -34,8 +34,8 @@ impl PySolver {
     fn new(
         rng: PyObject,
         parent_selector: PyObject,
-        mutator: PyObject,
         recombinator: PyObject,
+        mutator: PyObject,
         survivor_selector: PyObject,
         evaluator: Py<PyFunction>,
         initializer: Py<PyFunction>,
@@ -43,8 +43,8 @@ impl PySolver {
         Self {
             rng,
             parent_selector,
-            mutator: PyIndividualMutator::new(mutator),
             recombinator: PyIndividualRecombinator::new(recombinator),
+            mutator: PyIndividualMutator::new(mutator),
             survivor_selector,
             evaluator,
             initializer,
@@ -63,7 +63,19 @@ impl PySolver {
         let mut population = self
             .initializer
             .call1(py, (rng, population_size))?
-            .extract::<Vec<PyIndividual>>(py)?;
+            .extract::<Vec<PyObject>>(py)?
+            .into_iter()
+            .map(PyIndividual::new)
+            .collect::<Vec<_>>();
+
+        for individual in population.iter_mut() {
+            let fitness = self
+                .evaluator
+                .call1(py, (individual.individual(),))?
+                .extract(py)?;
+            individual.set_fitness(fitness);
+        }
+
         for _ in 0..number_generations {
             let mating_pool: Vec<_> = parent_selector.borrow().select(
                 rng.borrow_mut().deref_mut(),
@@ -84,9 +96,11 @@ impl PySolver {
             for individual in offspring.iter() {
                 let individual = PyCell::new(py, individual.clone()).unwrap();
                 self.mutator.mutate(py, rng, individual);
-                individual
-                    .borrow_mut()
-                    .set_fitness(self.evaluator.call1(py, (individual,))?.extract(py)?);
+                let fitness = self
+                    .evaluator
+                    .call1(py, (individual.borrow().individual(),))?
+                    .extract(py)?;
+                individual.borrow_mut().set_fitness(fitness);
             }
 
             survivor_selector.borrow().select(
