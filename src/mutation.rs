@@ -7,6 +7,7 @@ use crate::parameter::{
     BoundedValue, BoundedVector, GaussianStrategyParameter, SelfAdaptiveGaussianVector,
 };
 
+pub mod float;
 pub mod integer;
 
 pub trait Mutator<T> {

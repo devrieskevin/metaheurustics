@@ -26,6 +26,22 @@ where
             max_value,
         }
     }
+
+    pub fn get_probability(&self) -> f64 {
+        self.probability
+    }
+
+    pub fn get_max_bit_count(&self) -> u32 {
+        self.max_bit_count
+    }
+
+    pub fn get_min_value(&self) -> &T {
+        &self.min_value
+    }
+
+    pub fn get_max_value(&self) -> &T {
+        &self.max_value
+    }
 }
 
 pub struct RandomResetting<T> {
@@ -41,6 +57,18 @@ impl<T> RandomResetting<T> {
             min_value,
             max_value,
         }
+    }
+
+    pub fn get_probability(&self) -> f64 {
+        self.probability
+    }
+
+    pub fn get_min_value(&self) -> &T {
+        &self.min_value
+    }
+
+    pub fn get_max_value(&self) -> &T {
+        &self.max_value
     }
 }
 
@@ -59,6 +87,22 @@ impl<T> SimpleCreep<T> {
             max_value,
             step_size,
         }
+    }
+
+    pub fn get_probability(&self) -> f64 {
+        self.probability
+    }
+
+    pub fn get_min_value(&self) -> &T {
+        &self.min_value
+    }
+
+    pub fn get_max_value(&self) -> &T {
+        &self.max_value
+    }
+
+    pub fn get_step_size(&self) -> &T {
+        &self.step_size
     }
 }
 
